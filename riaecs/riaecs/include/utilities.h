@@ -13,4 +13,10 @@ namespace riaecs
         const std::string &file, int line, const std::string &function
     );
 
+    RIAECS_API void NotifyError
+    (
+        const std::initializer_list<std::string> &lines, 
+        const std::string &file, int line, const std::string &function
+    );
+
 } // namespace riaecs

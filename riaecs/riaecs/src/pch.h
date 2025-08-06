@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <initializer_list>
+#include <shared_mutex>
 
 #include <string>
 #include <string_view>
