@@ -5,6 +5,9 @@
     <ClCompile Include="tests\log_test.cpp">
       <Filter>tests</Filter>
     </ClCompile>
+    <ClCompile Include="tests\utilities_test.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />

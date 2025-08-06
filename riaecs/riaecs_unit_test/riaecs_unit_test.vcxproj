@@ -116,6 +116,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="tests\log_test.cpp" />
+    <ClCompile Include="tests\utilities_test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\riaecs\riaecs.vcxproj">
