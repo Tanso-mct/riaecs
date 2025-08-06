@@ -141,6 +141,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\log.cpp" />
     <ClCompile Include="src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -148,6 +149,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\dll_config.h" />
+    <ClInclude Include="include\interfaces\container.h" />
+    <ClInclude Include="include\interfaces\factory.h" />
+    <ClInclude Include="include\interfaces\id.h" />
+    <ClInclude Include="include\interfaces\registry.h" />
+    <ClInclude Include="include\log.h" />
     <ClInclude Include="src\pch.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
