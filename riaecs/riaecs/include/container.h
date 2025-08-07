@@ -15,6 +15,7 @@ namespace riaecs
     private:
         std::vector<std::unique_ptr<T>> objects_;
         std::vector<size_t> generations_;
+        std::vector<size_t> freeIndices_;
 
         mutable std::shared_mutex mutex_;
 
@@ -87,12 +88,26 @@ namespace riaecs
         {
             std::unique_lock<std::shared_mutex> lock(mutex_);
 
-            size_t id = objects_.size();
+            if (freeIndices_.empty())
+            {
+                size_t id = objects_.size();
 
-            objects_.emplace_back(std::move(object));
-            generations_.emplace_back(CONTAINER_DEFAULT_GENERATION);
+                objects_.emplace_back(std::move(object));
+                generations_.emplace_back(CONTAINER_DEFAULT_GENERATION);
 
-            return std::make_unique<ID>(id, generations_[id]);
+                return std::make_unique<ID>(id, generations_[id]);
+            }
+            else
+            {
+                size_t id = freeIndices_.back();
+                freeIndices_.pop_back();
+
+                objects_[id] = std::move(object);
+                generations_[id] = CONTAINER_DEFAULT_GENERATION;
+
+                return std::make_unique<ID>(id, generations_[id]);
+            }
+
         }
 
         std::unique_ptr<T> Erase(const IID &id) override
@@ -134,6 +149,9 @@ namespace riaecs
 
             // Update the generation for the ID
             generations_[id.Get()]++;
+
+            // Store the index in freeIndices_ for potential reuse
+            freeIndices_.push_back(id.Get());
 
             return object;
         }
