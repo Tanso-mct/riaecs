@@ -35,13 +35,7 @@ namespace riaecs
             std::unique_lock<std::shared_mutex> lock(mutex_);
 
             if (objects_.size() != 0)
-            {
-                NotifyError
-                (
-                    {"Container already created with count: ", std::to_string(objects_.size())},
-                    __FILE__, __LINE__, __FUNCTION__
-                );
-            }
+                NotifyError({"Container already created with count: " + std::to_string(objects_.size())}, RIAECS_LOG_LOC);
 
             objects_.resize(count);
             generations_.resize(count, CONTAINER_DEFAULT_GENERATION);
@@ -52,31 +46,13 @@ namespace riaecs
             std::unique_lock<std::shared_mutex> lock(mutex_);
 
             if (id.Get() >= objects_.size())
-            {
-                NotifyError
-                (
-                    {"ID out of range: ", std::to_string(id.Get())},
-                    __FILE__, __LINE__, __FUNCTION__
-                );
-            }
+                NotifyError({"ID out of range: " + std::to_string(id.Get())}, RIAECS_LOG_LOC);
 
             if (!objects_[id.Get()])
-            {
-                NotifyError
-                (
-                    {"No object found for ID: ", std::to_string(id.Get())},
-                    __FILE__, __LINE__, __FUNCTION__
-                );
-            }
+                NotifyError({"No object found for ID: " + std::to_string(id.Get())}, RIAECS_LOG_LOC);
 
             if (id.GetGeneration() != generations_[id.Get()])
-            {
-                NotifyError
-                (
-                    {"ID generation mismatch for ID: ", std::to_string(id.Get())},
-                    __FILE__, __LINE__, __FUNCTION__
-                );
-            }
+                NotifyError({"ID generation mismatch for ID: " + std::to_string(id.Get())}, RIAECS_LOG_LOC);
 
             // Update the generation for the ID
             generations_[id.Get()]++;
@@ -115,31 +91,13 @@ namespace riaecs
             std::unique_lock<std::shared_mutex> lock(mutex_);
 
             if (id.Get() >= objects_.size())
-            {
-                NotifyError
-                (
-                    {"ID out of range: ", std::to_string(id.Get())},
-                    __FILE__, __LINE__, __FUNCTION__
-                );
-            }
+                NotifyError({"ID out of range: " + std::to_string(id.Get())}, RIAECS_LOG_LOC);
 
             if (objects_[id.Get()] == nullptr)
-            {
-                NotifyError
-                (
-                    {"No object found for ID: ", std::to_string(id.Get())},
-                    __FILE__, __LINE__, __FUNCTION__
-                );
-            }
+                NotifyError({"No object found for ID: " + std::to_string(id.Get())}, RIAECS_LOG_LOC);
 
             if (id.GetGeneration() != generations_[id.Get()])
-            {
-                NotifyError
-                (
-                    {"ID generation mismatch for ID: ", std::to_string(id.Get())},
-                    __FILE__, __LINE__, __FUNCTION__
-                );
-            }
+                NotifyError({"ID generation mismatch for ID: " + std::to_string(id.Get())}, RIAECS_LOG_LOC);
 
             // Move the will be erased object to return it
             std::unique_ptr<T> object = std::move(objects_[id.Get()]);
@@ -161,31 +119,13 @@ namespace riaecs
             std::shared_lock<std::shared_mutex> lock(mutex_);
 
             if (id.Get() >= objects_.size())
-            {
-                NotifyError
-                (
-                    {"ID out of range: ", std::to_string(id.Get())},
-                    __FILE__, __LINE__, __FUNCTION__
-                );
-            }
+                NotifyError({"ID out of range: " + std::to_string(id.Get())}, RIAECS_LOG_LOC);
 
             if (objects_[id.Get()] == nullptr)
-            {
-                NotifyError
-                (
-                    {"No object found for ID: ", std::to_string(id.Get())},
-                    __FILE__, __LINE__, __FUNCTION__
-                );
-            }
+                NotifyError({"No object found for ID: " + std::to_string(id.Get())}, RIAECS_LOG_LOC);
 
             if (id.GetGeneration() != generations_[id.Get()])
-            {
-                NotifyError
-                (
-                    {"ID generation mismatch for ID: ", std::to_string(id.Get())},
-                    __FILE__, __LINE__, __FUNCTION__
-                );
-            }
+                NotifyError({"ID generation mismatch for ID: " + std::to_string(id.Get())}, RIAECS_LOG_LOC);
 
             return ReadOnlyObject<T>(std::move(lock), *objects_[id.Get()]);
         }
@@ -195,22 +135,10 @@ namespace riaecs
             std::unique_lock<std::shared_mutex> lock(mutex_);
 
             if (id.Get() >= objects_.size())
-            {
-                NotifyError
-                (
-                    {"ID out of range: ", std::to_string(id.Get())},
-                    __FILE__, __LINE__, __FUNCTION__
-                );
-            }
+                NotifyError({"ID out of range: " + std::to_string(id.Get())}, RIAECS_LOG_LOC);
 
             if (id.GetGeneration() != generations_[id.Get()])
-            {
-                NotifyError
-                (
-                    {"ID generation mismatch for ID: ", std::to_string(id.Get())},
-                    __FILE__, __LINE__, __FUNCTION__
-                );
-            }
+                NotifyError({"ID generation mismatch for ID: " + std::to_string(id.Get())}, RIAECS_LOG_LOC);
 
             objects_[id.Get()] = std::move(object);
         }
@@ -220,13 +148,7 @@ namespace riaecs
             std::shared_lock<std::shared_mutex> lock(mutex_);
 
             if (index >= generations_.size())
-            {
-                NotifyError
-                (
-                    {"Index out of range: ", std::to_string(index)},
-                    __FILE__, __LINE__, __FUNCTION__
-                );
-            }
+                NotifyError({"Index out of range: " + std::to_string(index)}, RIAECS_LOG_LOC);
 
             return generations_[index];
         }
@@ -236,13 +158,7 @@ namespace riaecs
             std::shared_lock<std::shared_mutex> lock(mutex_);
 
             if (id.Get() >= objects_.size())
-            {
-                NotifyError
-                (
-                    {"ID out of range: ", std::to_string(id.Get())},
-                    __FILE__, __LINE__, __FUNCTION__
-                );
-            }
+                NotifyError({"ID out of range: " + std::to_string(id.Get())}, RIAECS_LOG_LOC);
 
             return objects_[id.Get()] != nullptr && id.GetGeneration() == generations_[id.Get()];
         }

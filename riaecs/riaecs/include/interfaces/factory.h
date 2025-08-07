@@ -7,7 +7,7 @@ namespace riaecs
     {
     public:
         virtual ~IFactory() = default;
-        virtual PRODUCT Create(ARGS...) = 0;a
+        virtual PRODUCT Create(ARGS...) const = 0;
     };
 
 } // namespace riaecs

@@ -11,6 +11,9 @@
     <ClCompile Include="tests\container_test.cpp">
       <Filter>tests</Filter>
     </ClCompile>
+    <ClCompile Include="tests\factory_registry_test.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -19,5 +22,8 @@
     <Filter Include="tests">
       <UniqueIdentifier>{ff9f9805-36e7-4560-aa91-3460e254533c}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

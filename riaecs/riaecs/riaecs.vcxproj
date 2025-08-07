@@ -151,6 +151,7 @@
   <ItemGroup>
     <ClInclude Include="include\container.h" />
     <ClInclude Include="include\dll_config.h" />
+    <ClInclude Include="include\factory_registry.h" />
     <ClInclude Include="include\id.h" />
     <ClInclude Include="include\interfaces\container.h" />
     <ClInclude Include="include\interfaces\factory.h" />

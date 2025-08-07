@@ -29,7 +29,7 @@ RIAECS_API void riaecs::NotifyError
     const std::string &file, int line, const std::string &function)
 {
     // Create the error message
-    std::string log = riaecs::CreateMessage(lines, __FILE__, __LINE__, __FUNCTION__);
+    std::string log = riaecs::CreateMessage(lines, file, line, function);
 
     // Output the error message to console and error window
     riaecs::Log::OutToConsole(log, riaecs::CONSOLE_TEXT_COLOR_ERROR);
