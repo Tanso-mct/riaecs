@@ -22,62 +22,60 @@ TEST(Container, Use)
     // Set and get objects in the container
     for (int i = 0; i < INITIAL_COUNT; ++i)
     {
-        std::unique_ptr<riaecs::IID> id = std::make_unique<riaecs::ID>(i, riaecs::CONTAINER_DEFAULT_GENERATION);
+        riaecs::ID id = riaecs::ID(i, riaecs::CONTAINER_DEFAULT_GENERATION);
         std::unique_ptr<TestObject> object = std::make_unique<TestObject>(i);
-        container.Set(*id, std::move(object));
+        container.Set(id, std::move(object));
 
-        EXPECT_EQ(container.Contains(*id), true);
-        EXPECT_EQ(container.Get(*id)().value, i);
+        EXPECT_EQ(container.Contains(id), true);
+        EXPECT_EQ(container.Get(id)().value, i);
     }
 
     // Test releasing an object
     {
         const size_t TARGET_INDEX = 2;
-        std::unique_ptr<riaecs::IID> targetID 
-        = std::make_unique<riaecs::ID>(TARGET_INDEX, riaecs::CONTAINER_DEFAULT_GENERATION);
+        riaecs::ID targetID = riaecs::ID(TARGET_INDEX, riaecs::CONTAINER_DEFAULT_GENERATION);
 
-        std::unique_ptr<TestObject> releasedObject = container.Release(*targetID);
+        std::unique_ptr<TestObject> releasedObject = container.Release(targetID);
         EXPECT_EQ(releasedObject->value, TARGET_INDEX);
 
         // Re set the object at the released index
-        std::unique_ptr<riaecs::IID> targetNewID 
-        = std::make_unique<riaecs::ID>(TARGET_INDEX, container.GetGeneration(TARGET_INDEX));
+        riaecs::ID targetNewID = riaecs::ID(TARGET_INDEX, container.GetGeneration(TARGET_INDEX));
 
         const size_t NEW_OBJECT_VALUE = 10;
         std::unique_ptr<TestObject> newObject = std::make_unique<TestObject>(NEW_OBJECT_VALUE);
-        container.Set(*targetNewID, std::move(newObject));
-        EXPECT_EQ(container.Contains(*targetNewID), true);
-        EXPECT_EQ(container.Get(*targetNewID)().value, NEW_OBJECT_VALUE);
+        container.Set(targetNewID, std::move(newObject));
+        EXPECT_EQ(container.Contains(targetNewID), true);
+        EXPECT_EQ(container.Get(targetNewID)().value, NEW_OBJECT_VALUE);
     }
 
     // Add a new object
     {
         const size_t NEW_OBJECT_VALUE = 100;
         std::unique_ptr<TestObject> newObject = std::make_unique<TestObject>(NEW_OBJECT_VALUE);
-        std::unique_ptr<riaecs::IID> newID = container.Add(std::move(newObject));
+        riaecs::ID newID = container.Add(std::move(newObject));
 
-        EXPECT_EQ(container.Contains(*newID), true);
-        EXPECT_EQ(container.Get(*newID)().value, 100);
+        EXPECT_EQ(container.Contains(newID), true);
+        EXPECT_EQ(container.Get(newID)().value, 100);
     }
 
     // Erase an object
     const size_t ERASE_INDEX = 4;
     {
-        std::unique_ptr<riaecs::IID> eraseID 
-        = std::make_unique<riaecs::ID>(ERASE_INDEX, riaecs::CONTAINER_DEFAULT_GENERATION);
+        riaecs::ID eraseID 
+        = riaecs::ID(ERASE_INDEX, riaecs::CONTAINER_DEFAULT_GENERATION);
 
-        std::unique_ptr<TestObject> erasedObject = container.Erase(*eraseID);
-        EXPECT_EQ(container.Contains(*eraseID), false);
+        std::unique_ptr<TestObject> erasedObject = container.Erase(eraseID);
+        EXPECT_EQ(container.Contains(eraseID), false);
     }
 
     // Add a new object after erasing
     {
         const size_t NEW_OBJECT_VALUE = 200;
         std::unique_ptr<TestObject> newObject = std::make_unique<TestObject>(NEW_OBJECT_VALUE);
-        std::unique_ptr<riaecs::IID> newID = container.Add(std::move(newObject));
-        EXPECT_EQ(newID->Get(), ERASE_INDEX);
+        riaecs::ID newID = container.Add(std::move(newObject));
+        EXPECT_EQ(newID.index_, ERASE_INDEX);
 
-        EXPECT_EQ(container.Contains(*newID), true);
-        EXPECT_EQ(container.Get(*newID)().value, NEW_OBJECT_VALUE);
+        EXPECT_EQ(container.Contains(newID), true);
+        EXPECT_EQ(container.Get(newID)().value, NEW_OBJECT_VALUE);
     }
 }

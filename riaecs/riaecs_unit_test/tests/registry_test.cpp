@@ -1,13 +1,13 @@
 ﻿#include "riaecs_unit_test/pch.h"
 
-#include "riaecs/include/factory_registry.h"
+#include "riaecs/include/registry.h"
 #include "riaecs/include/interfaces/factory.h"
 #pragma comment(lib, "riaecs.lib")
 
 constexpr int TEST_FACTORY_A = 0;
 constexpr int TEST_FACTORY_B = 1;
 
-TEST(FactoryRegistry, Use)
+TEST(Registry, Use)
 {
     using ITestFactory = riaecs::IFactory<int>;
 
@@ -23,7 +23,7 @@ TEST(FactoryRegistry, Use)
         int Create() const override { return TEST_FACTORY_B; }
     };
 
-    riaecs::FactoryRegistry<ITestFactory> registry;
+    riaecs::Registry<ITestFactory> registry;
 
     // Add a factory to the registry
     size_t idA = 0;

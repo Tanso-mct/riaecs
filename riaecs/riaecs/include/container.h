@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "riaecs/include/interfaces/container.h"
+#include "riaecs/include/types/id.h"
 #include "riaecs/include/utilities.h"
-#include "riaecs/include/id.h"
 
 #include <stdexcept>
 #include <shared_mutex>
@@ -41,26 +41,26 @@ namespace riaecs
             generations_.resize(count, CONTAINER_DEFAULT_GENERATION);
         }
 
-        std::unique_ptr<T> Release(const IID &id) override
+        std::unique_ptr<T> Release(const ID &id) override
         {
             std::unique_lock<std::shared_mutex> lock(mutex_);
 
-            if (id.Get() >= objects_.size())
-                NotifyError({"ID out of range: " + std::to_string(id.Get())}, RIAECS_LOG_LOC);
+            if (id.index_ >= objects_.size())
+                NotifyError({"ID out of range: " + std::to_string(id.index_)}, RIAECS_LOG_LOC);
 
-            if (!objects_[id.Get()])
-                NotifyError({"No object found for ID: " + std::to_string(id.Get())}, RIAECS_LOG_LOC);
+            if (!objects_[id.index_])
+                NotifyError({"No object found for ID: " + std::to_string(id.index_)}, RIAECS_LOG_LOC);
 
-            if (id.GetGeneration() != generations_[id.Get()])
-                NotifyError({"ID generation mismatch for ID: " + std::to_string(id.Get())}, RIAECS_LOG_LOC);
+            if (id.generation_ != generations_[id.index_])
+                NotifyError({"ID generation mismatch for ID: " + std::to_string(id.index_)}, RIAECS_LOG_LOC);
 
             // Update the generation for the ID
-            generations_[id.Get()]++;
+            generations_[id.index_]++;
 
-            return std::move(objects_[id.Get()]);
+            return std::move(objects_[id.index_]);
         }
 
-        std::unique_ptr<IID> Add(std::unique_ptr<T> object) override
+        ID Add(std::unique_ptr<T> object) override
         {
             std::unique_lock<std::shared_mutex> lock(mutex_);
 
@@ -71,7 +71,7 @@ namespace riaecs
                 objects_.emplace_back(std::move(object));
                 generations_.emplace_back(CONTAINER_DEFAULT_GENERATION);
 
-                return std::make_unique<ID>(id, generations_[id]);
+                return ID(id, generations_[id]);
             }
             else
             {
@@ -81,66 +81,66 @@ namespace riaecs
                 objects_[id] = std::move(object);
                 generations_[id] = CONTAINER_DEFAULT_GENERATION;
 
-                return std::make_unique<ID>(id, generations_[id]);
+                return ID(id, generations_[id]);
             }
 
         }
 
-        std::unique_ptr<T> Erase(const IID &id) override
+        std::unique_ptr<T> Erase(const ID &id) override
         {
             std::unique_lock<std::shared_mutex> lock(mutex_);
 
-            if (id.Get() >= objects_.size())
-                NotifyError({"ID out of range: " + std::to_string(id.Get())}, RIAECS_LOG_LOC);
+            if (id.index_ >= objects_.size())
+                NotifyError({"ID out of range: " + std::to_string(id.index_)}, RIAECS_LOG_LOC);
 
-            if (objects_[id.Get()] == nullptr)
-                NotifyError({"No object found for ID: " + std::to_string(id.Get())}, RIAECS_LOG_LOC);
+            if (objects_[id.index_] == nullptr)
+                NotifyError({"No object found for ID: " + std::to_string(id.index_)}, RIAECS_LOG_LOC);
 
-            if (id.GetGeneration() != generations_[id.Get()])
-                NotifyError({"ID generation mismatch for ID: " + std::to_string(id.Get())}, RIAECS_LOG_LOC);
+            if (id.generation_ != generations_[id.index_])
+                NotifyError({"ID generation mismatch for ID: " + std::to_string(id.index_)}, RIAECS_LOG_LOC);
 
             // Move the will be erased object to return it
-            std::unique_ptr<T> object = std::move(objects_[id.Get()]);
+            std::unique_ptr<T> object = std::move(objects_[id.index_]);
 
             // Reset the object
-            objects_[id.Get()] = nullptr;
+            objects_[id.index_] = nullptr;
 
             // Update the generation for the ID
-            generations_[id.Get()]++;
+            generations_[id.index_]++;
 
             // Store the index in freeIndices_ for potential reuse
-            freeIndices_.push_back(id.Get());
+            freeIndices_.push_back(id.index_);
 
             return object;
         }
 
-        ReadOnlyObject<T> Get(const IID &id) const override
+        ReadOnlyObject<T> Get(const ID &id) const override
         {
             std::shared_lock<std::shared_mutex> lock(mutex_);
 
-            if (id.Get() >= objects_.size())
-                NotifyError({"ID out of range: " + std::to_string(id.Get())}, RIAECS_LOG_LOC);
+            if (id.index_ >= objects_.size())
+                NotifyError({"ID out of range: " + std::to_string(id.index_)}, RIAECS_LOG_LOC);
 
-            if (objects_[id.Get()] == nullptr)
-                NotifyError({"No object found for ID: " + std::to_string(id.Get())}, RIAECS_LOG_LOC);
+            if (objects_[id.index_] == nullptr)
+                NotifyError({"No object found for ID: " + std::to_string(id.index_)}, RIAECS_LOG_LOC);
 
-            if (id.GetGeneration() != generations_[id.Get()])
-                NotifyError({"ID generation mismatch for ID: " + std::to_string(id.Get())}, RIAECS_LOG_LOC);
+            if (id.generation_ != generations_[id.index_])
+                NotifyError({"ID generation mismatch for ID: " + std::to_string(id.index_)}, RIAECS_LOG_LOC);
 
-            return ReadOnlyObject<T>(std::move(lock), *objects_[id.Get()]);
+            return ReadOnlyObject<T>(std::move(lock), *objects_[id.index_]);
         }
 
-        void Set(const IID &id, std::unique_ptr<T> object) override
+        void Set(const ID &id, std::unique_ptr<T> object) override
         {
             std::unique_lock<std::shared_mutex> lock(mutex_);
 
-            if (id.Get() >= objects_.size())
-                NotifyError({"ID out of range: " + std::to_string(id.Get())}, RIAECS_LOG_LOC);
+            if (id.index_ >= objects_.size())
+                NotifyError({"ID out of range: " + std::to_string(id.index_)}, RIAECS_LOG_LOC);
 
-            if (id.GetGeneration() != generations_[id.Get()])
-                NotifyError({"ID generation mismatch for ID: " + std::to_string(id.Get())}, RIAECS_LOG_LOC);
+            if (id.generation_ != generations_[id.index_])
+                NotifyError({"ID generation mismatch for ID: " + std::to_string(id.index_)}, RIAECS_LOG_LOC);
 
-            objects_[id.Get()] = std::move(object);
+            objects_[id.index_] = std::move(object);
         }
 
         size_t GetGeneration(size_t index) const override
@@ -153,14 +153,14 @@ namespace riaecs
             return generations_[index];
         }
 
-        bool Contains(const IID &id) const override
+        bool Contains(const ID &id) const override
         {
             std::shared_lock<std::shared_mutex> lock(mutex_);
 
-            if (id.Get() >= objects_.size())
-                NotifyError({"ID out of range: " + std::to_string(id.Get())}, RIAECS_LOG_LOC);
+            if (id.index_ >= objects_.size())
+                NotifyError({"ID out of range: " + std::to_string(id.index_)}, RIAECS_LOG_LOC);
 
-            return objects_[id.Get()] != nullptr && id.GetGeneration() == generations_[id.Get()];
+            return objects_[id.index_] != nullptr && id.generation_ == generations_[id.index_];
         }
 
         size_t GetCount() const override

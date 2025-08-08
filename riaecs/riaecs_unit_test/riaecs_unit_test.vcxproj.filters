@@ -11,7 +11,7 @@
     <ClCompile Include="tests\container_test.cpp">
       <Filter>tests</Filter>
     </ClCompile>
-    <ClCompile Include="tests\factory_registry_test.cpp">
+    <ClCompile Include="tests\registry_test.cpp">
       <Filter>tests</Filter>
     </ClCompile>
   </ItemGroup>

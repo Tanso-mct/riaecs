@@ -151,14 +151,15 @@
   <ItemGroup>
     <ClInclude Include="include\container.h" />
     <ClInclude Include="include\dll_config.h" />
-    <ClInclude Include="include\factory_registry.h" />
-    <ClInclude Include="include\id.h" />
+    <ClInclude Include="include\interfaces\allocator.h" />
     <ClInclude Include="include\interfaces\container.h" />
+    <ClInclude Include="include\interfaces\ecs.h" />
     <ClInclude Include="include\interfaces\factory.h" />
-    <ClInclude Include="include\interfaces\id.h" />
     <ClInclude Include="include\interfaces\registry.h" />
-    <ClInclude Include="include\interfaces\thread.h" />
+    <ClInclude Include="include\interfaces\system.h" />
     <ClInclude Include="include\log.h" />
+    <ClInclude Include="include\types\id.h" />
+    <ClInclude Include="include\types\object.h" />
     <ClInclude Include="include\utilities.h" />
     <ClInclude Include="src\pch.h" />
   </ItemGroup>

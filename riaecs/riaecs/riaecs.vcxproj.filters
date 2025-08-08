@@ -16,6 +16,9 @@
     <Filter Include="ヘッダー ファイル\interfaces">
       <UniqueIdentifier>{db225f3b-3514-451a-b6ef-ee7a8246b902}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ヘッダー ファイル\types">
+      <UniqueIdentifier>{17b229b8-6687-4a91-abcf-58855436e9bd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\pch.cpp">
@@ -41,9 +44,6 @@
     <ClInclude Include="include\interfaces\factory.h">
       <Filter>ヘッダー ファイル\interfaces</Filter>
     </ClInclude>
-    <ClInclude Include="include\interfaces\id.h">
-      <Filter>ヘッダー ファイル\interfaces</Filter>
-    </ClInclude>
     <ClInclude Include="include\interfaces\registry.h">
       <Filter>ヘッダー ファイル\interfaces</Filter>
     </ClInclude>
@@ -53,17 +53,23 @@
     <ClInclude Include="include\utilities.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="include\interfaces\thread.h">
-      <Filter>ヘッダー ファイル\interfaces</Filter>
-    </ClInclude>
     <ClInclude Include="include\container.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="include\id.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="include\types\id.h">
+      <Filter>ヘッダー ファイル\types</Filter>
     </ClInclude>
-    <ClInclude Include="include\factory_registry.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="include\types\object.h">
+      <Filter>ヘッダー ファイル\types</Filter>
+    </ClInclude>
+    <ClInclude Include="include\interfaces\ecs.h">
+      <Filter>ヘッダー ファイル\interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="include\interfaces\system.h">
+      <Filter>ヘッダー ファイル\interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="include\interfaces\allocator.h">
+      <Filter>ヘッダー ファイル\interfaces</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
