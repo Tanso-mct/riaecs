@@ -38,7 +38,7 @@ namespace riaecs
                 NotifyError({"Container already created with count: " + std::to_string(objects_.size())}, RIAECS_LOG_LOC);
 
             objects_.resize(count);
-            generations_.resize(count, CONTAINER_DEFAULT_GENERATION);
+            generations_.resize(count, ID_DEFAULT_GENERATION);
         }
 
         std::unique_ptr<T> Release(const ID &id) override
@@ -69,7 +69,7 @@ namespace riaecs
                 size_t id = objects_.size();
 
                 objects_.emplace_back(std::move(object));
-                generations_.emplace_back(CONTAINER_DEFAULT_GENERATION);
+                generations_.emplace_back(ID_DEFAULT_GENERATION);
 
                 return ID(id, generations_[id]);
             }
@@ -79,7 +79,7 @@ namespace riaecs
                 freeIndices_.pop_back();
 
                 objects_[id] = std::move(object);
-                generations_[id] = CONTAINER_DEFAULT_GENERATION;
+                generations_[id] = ID_DEFAULT_GENERATION;
 
                 return ID(id, generations_[id]);
             }

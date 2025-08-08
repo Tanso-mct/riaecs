@@ -1,0 +1,50 @@
+﻿#pragma once
+#include "riaecs/include/dll_config.h"
+
+#include "riaecs/include/interfaces/ecs.h"
+#include "riaecs/include/types/stl_hash.h"
+#include "riaecs/include/types/stl_euqal.h"
+
+#include <unordered_map>
+
+namespace riaecs
+{
+    class RIAECS_API ECSWorld : public IECSWorld
+    {
+    private:
+        std::unique_ptr<ComponentFactoryRegistry> componentFactoryRegistry_ = nullptr;
+        std::unique_ptr<PoolFactory> poolFactory_ = nullptr;
+        std::unique_ptr<AllocatorFactory> allocatorFactory_ = nullptr;
+        mutable bool isReady_ = false;
+
+        size_t nextEntityIndex_ = 0;
+        std::vector<ID> freeEntityIDs_;
+
+        std::vector<std::unique_ptr<IPool>> componentPools_;
+        std::vector<std::unique_ptr<IAllocator>> componentAllocators_;
+
+        std::unordered_map<Entity, std::unordered_set<size_t>> entityToComponents_;
+        std::unordered_map<size_t, std::unordered_set<Entity>> componentToEntities_;
+        std::unordered_map<std::pair<Entity, size_t>, void*, PairHash, PairEqual> entityComponentToData_;
+
+    public:
+        ECSWorld() = default;
+        virtual ~ECSWorld() = default;
+
+        void SetComponentFactoryRegistry(std::unique_ptr<ComponentFactoryRegistry> registry) override;
+        void SetPoolFactory(std::unique_ptr<PoolFactory> poolFactory) override;
+        void SetAllocatorFactory(std::unique_ptr<AllocatorFactory> allocatorFactory) override;
+        bool IsReady() const override;
+
+        Entity CreateEntity() override;
+        void DestroyEntity(const Entity &entity) override;
+
+        void AddComponent(const Entity &entity, size_t componentID) override;
+        void RemoveComponent(const Entity &entity, size_t componentID) override;
+        bool HasComponent(const Entity &entity, size_t componentID) const override;
+        void *GetComponent(const Entity &entity, size_t componentID) override;
+
+        std::unordered_set<Entity> View(size_t componentID) const override;
+    };
+
+} // namespace riaecs

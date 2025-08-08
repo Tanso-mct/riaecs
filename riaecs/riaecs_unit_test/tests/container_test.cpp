@@ -22,7 +22,7 @@ TEST(Container, Use)
     // Set and get objects in the container
     for (int i = 0; i < INITIAL_COUNT; ++i)
     {
-        riaecs::ID id = riaecs::ID(i, riaecs::CONTAINER_DEFAULT_GENERATION);
+        riaecs::ID id = riaecs::ID(i, riaecs::ID_DEFAULT_GENERATION);
         std::unique_ptr<TestObject> object = std::make_unique<TestObject>(i);
         container.Set(id, std::move(object));
 
@@ -33,7 +33,7 @@ TEST(Container, Use)
     // Test releasing an object
     {
         const size_t TARGET_INDEX = 2;
-        riaecs::ID targetID = riaecs::ID(TARGET_INDEX, riaecs::CONTAINER_DEFAULT_GENERATION);
+        riaecs::ID targetID = riaecs::ID(TARGET_INDEX, riaecs::ID_DEFAULT_GENERATION);
 
         std::unique_ptr<TestObject> releasedObject = container.Release(targetID);
         EXPECT_EQ(releasedObject->value, TARGET_INDEX);
@@ -62,7 +62,7 @@ TEST(Container, Use)
     const size_t ERASE_INDEX = 4;
     {
         riaecs::ID eraseID 
-        = riaecs::ID(ERASE_INDEX, riaecs::CONTAINER_DEFAULT_GENERATION);
+        = riaecs::ID(ERASE_INDEX, riaecs::ID_DEFAULT_GENERATION);
 
         std::unique_ptr<TestObject> erasedObject = container.Erase(eraseID);
         EXPECT_EQ(container.Contains(eraseID), false);

@@ -30,6 +30,9 @@
     <ClCompile Include="src\utilities.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="src\ecs.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\pch.h">
@@ -37,15 +40,6 @@
     </ClInclude>
     <ClInclude Include="include\dll_config.h">
       <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="include\interfaces\container.h">
-      <Filter>ヘッダー ファイル\interfaces</Filter>
-    </ClInclude>
-    <ClInclude Include="include\interfaces\factory.h">
-      <Filter>ヘッダー ファイル\interfaces</Filter>
-    </ClInclude>
-    <ClInclude Include="include\interfaces\registry.h">
-      <Filter>ヘッダー ファイル\interfaces</Filter>
     </ClInclude>
     <ClInclude Include="include\log.h">
       <Filter>ヘッダー ファイル</Filter>
@@ -62,14 +56,35 @@
     <ClInclude Include="include\types\object.h">
       <Filter>ヘッダー ファイル\types</Filter>
     </ClInclude>
+    <ClInclude Include="include\interfaces\container.h">
+      <Filter>ヘッダー ファイル\interfaces</Filter>
+    </ClInclude>
     <ClInclude Include="include\interfaces\ecs.h">
+      <Filter>ヘッダー ファイル\interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="include\interfaces\factory.h">
+      <Filter>ヘッダー ファイル\interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="include\interfaces\memory.h">
+      <Filter>ヘッダー ファイル\interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="include\interfaces\registry.h">
       <Filter>ヘッダー ファイル\interfaces</Filter>
     </ClInclude>
     <ClInclude Include="include\interfaces\system.h">
       <Filter>ヘッダー ファイル\interfaces</Filter>
     </ClInclude>
-    <ClInclude Include="include\interfaces\allocator.h">
-      <Filter>ヘッダー ファイル\interfaces</Filter>
+    <ClInclude Include="include\ecs.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="include\registry.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="include\types\stl_euqal.h">
+      <Filter>ヘッダー ファイル\types</Filter>
+    </ClInclude>
+    <ClInclude Include="include\types\stl_hash.h">
+      <Filter>ヘッダー ファイル\types</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

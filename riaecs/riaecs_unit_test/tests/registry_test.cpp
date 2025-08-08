@@ -15,12 +15,14 @@ TEST(Registry, Use)
     {
     public:
         int Create() const override { return TEST_FACTORY_A; }
+        size_t GetProductSize() const override { return sizeof(int); }
     };
 
     class TestBFactory : public ITestFactory
     {
     public:
         int Create() const override { return TEST_FACTORY_B; }
+        size_t GetProductSize() const override { return sizeof(int); }
     };
 
     riaecs::Registry<ITestFactory> registry;

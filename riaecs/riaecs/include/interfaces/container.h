@@ -7,8 +7,6 @@
 
 namespace riaecs
 {
-    constexpr size_t CONTAINER_DEFAULT_GENERATION = 0;
-
     template <typename T>
     class IContainer
     {
