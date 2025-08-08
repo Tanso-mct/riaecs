@@ -25,7 +25,7 @@ namespace riaecs
 
         std::unordered_map<Entity, std::unordered_set<size_t>> entityToComponents_;
         std::unordered_map<size_t, std::unordered_set<Entity>> componentToEntities_;
-        std::unordered_map<std::pair<Entity, size_t>, void*, PairHash, PairEqual> entityComponentToData_;
+        std::unordered_map<std::pair<Entity, size_t>, std::byte*, PairHash, PairEqual> entityComponentToData_;
 
     public:
         ECSWorld() = default;

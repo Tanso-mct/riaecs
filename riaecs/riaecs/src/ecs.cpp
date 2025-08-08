@@ -86,7 +86,7 @@ void riaecs::ECSWorld::DestroyEntity(const Entity &entity)
             componentToEntities_[componentID].erase(entity);
 
             // Free the component data which was allocated for this entity
-            void *componentData = entityComponentToData_[{entity, componentID}];
+            std::byte *componentData = entityComponentToData_[{entity, componentID}];
             componentAllocators_[componentID]->Free(componentData, *componentPools_[componentID]);
             entityComponentToData_.erase({entity, componentID});
         }
@@ -114,7 +114,7 @@ void riaecs::ECSWorld::AddComponent(const Entity &entity, size_t componentID)
     riaecs::ReadOnlyObject<riaecs::ComponentFactory> factory = componentFactoryRegistry_->Get(componentID);
 
     // Allocate memory for the component using the allocator
-    void *componentPtr 
+    std::byte *componentPtr 
     = componentAllocators_[componentID]->Malloc(factory().GetProductSize(), *componentPools_[componentID]);
 
     if (!componentPtr)
@@ -149,7 +149,7 @@ void riaecs::ECSWorld::RemoveComponent(const Entity &entity, size_t componentID)
         componentToEntities_[componentID].erase(entity);
 
         // Free the component data which was allocated for this entity
-        void *componentData = entityComponentToData_[{entity, componentID}];
+        std::byte *componentData = entityComponentToData_[{entity, componentID}];
         componentAllocators_[componentID]->Free(componentData, *componentPools_[componentID]);
         entityComponentToData_.erase({entity, componentID});
     }
