@@ -14,8 +14,8 @@ namespace riaecs
     using ComponentFactory = IFactory<void*, void*>;
     using ComponentFactoryRegistry = IRegistry<ComponentFactory>;
 
-    using PoolFactory = IFactory<IPool>;
-    using AllocatorFactory = IFactory<IAllocator>;
+    using IPoolFactory = IFactory<IPool>;
+    using IAllocatorFactory = IFactory<IAllocator>;
 
     class IECSWorld
     {
@@ -23,8 +23,8 @@ namespace riaecs
         virtual ~IECSWorld() = default;
 
         virtual void SetComponentFactoryRegistry(std::unique_ptr<ComponentFactoryRegistry> registry) = 0;
-        virtual void SetPoolFactory(std::unique_ptr<PoolFactory> poolFactory) = 0;
-        virtual void SetAllocatorFactory(std::unique_ptr<AllocatorFactory> allocatorFactory) = 0;
+        virtual void SetPoolFactory(std::unique_ptr<IPoolFactory> poolFactory) = 0;
+        virtual void SetAllocatorFactory(std::unique_ptr<IAllocatorFactory> allocatorFactory) = 0;
         virtual bool IsReady() const = 0;
 
         virtual Entity CreateEntity() = 0;

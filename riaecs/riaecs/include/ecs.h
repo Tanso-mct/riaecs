@@ -13,8 +13,8 @@ namespace riaecs
     {
     private:
         std::unique_ptr<ComponentFactoryRegistry> componentFactoryRegistry_ = nullptr;
-        std::unique_ptr<PoolFactory> poolFactory_ = nullptr;
-        std::unique_ptr<AllocatorFactory> allocatorFactory_ = nullptr;
+        std::unique_ptr<IPoolFactory> poolFactory_ = nullptr;
+        std::unique_ptr<IAllocatorFactory> allocatorFactory_ = nullptr;
         mutable bool isReady_ = false;
 
         size_t nextEntityIndex_ = 0;
@@ -32,8 +32,8 @@ namespace riaecs
         virtual ~ECSWorld() = default;
 
         void SetComponentFactoryRegistry(std::unique_ptr<ComponentFactoryRegistry> registry) override;
-        void SetPoolFactory(std::unique_ptr<PoolFactory> poolFactory) override;
-        void SetAllocatorFactory(std::unique_ptr<AllocatorFactory> allocatorFactory) override;
+        void SetPoolFactory(std::unique_ptr<IPoolFactory> poolFactory) override;
+        void SetAllocatorFactory(std::unique_ptr<IAllocatorFactory> allocatorFactory) override;
         bool IsReady() const override;
 
         Entity CreateEntity() override;

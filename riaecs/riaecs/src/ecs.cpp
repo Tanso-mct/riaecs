@@ -8,12 +8,12 @@ void riaecs::ECSWorld::SetComponentFactoryRegistry(std::unique_ptr<ComponentFact
     componentFactoryRegistry_ = std::move(registry);
 }
 
-void riaecs::ECSWorld::SetPoolFactory(std::unique_ptr<PoolFactory> poolFactory)
+void riaecs::ECSWorld::SetPoolFactory(std::unique_ptr<IPoolFactory> poolFactory)
 {
     poolFactory_ = std::move(poolFactory);
 }
 
-void riaecs::ECSWorld::SetAllocatorFactory(std::unique_ptr<AllocatorFactory> allocatorFactory)
+void riaecs::ECSWorld::SetAllocatorFactory(std::unique_ptr<IAllocatorFactory> allocatorFactory)
 {
     allocatorFactory_ = std::move(allocatorFactory);
 }
