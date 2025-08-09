@@ -15,6 +15,8 @@ TEST(Registry, Use)
     {
     public:
         int Create() const override { return TEST_FACTORY_A; }
+        void Destroy(int product) const override {}
+        
         size_t GetProductSize() const override { return sizeof(int); }
     };
 
@@ -22,6 +24,8 @@ TEST(Registry, Use)
     {
     public:
         int Create() const override { return TEST_FACTORY_B; }
+        void Destroy(int product) const override {}
+
         size_t GetProductSize() const override { return sizeof(int); }
     };
 

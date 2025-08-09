@@ -8,11 +8,6 @@ void riaecs::ECSWorld::SetComponentFactoryRegistry(std::unique_ptr<IComponentFac
     componentFactoryRegistry_ = std::move(registry);
 }
 
-void riaecs::ECSWorld::SetComponentDestroyerRegistry(std::unique_ptr<IComponentDestroyerRegistry> registry)
-{
-    componentDestroyerRegistry_ = std::move(registry);
-}
-
 void riaecs::ECSWorld::SetPoolFactory(std::unique_ptr<IPoolFactory> poolFactory)
 {
     poolFactory_ = std::move(poolFactory);
@@ -28,13 +23,6 @@ bool riaecs::ECSWorld::IsReady() const
     if (!componentFactoryRegistry_)
     {
         riaecs::NotifyError({"ComponentFactoryRegistry is not set"}, RIAECS_LOG_LOC);
-        isReady_ = false;
-        return isReady_;
-    }
-
-    if (!componentDestroyerRegistry_)
-    {
-        riaecs::NotifyError({"ComponentDestroyerRegistry is not set"}, RIAECS_LOG_LOC);
         isReady_ = false;
         return isReady_;
     }
@@ -139,12 +127,12 @@ void riaecs::ECSWorld::DestroyEntity(const Entity &entity)
             // Remove the component from the entity
             componentToEntities_[componentID].erase(entity);
 
-            // Get the component destroyer for the component ID
-            riaecs::ReadOnlyObject<IComponentDestroyer> destroyer = componentDestroyerRegistry_->Get(componentID);
+            // Get the component factory for the component ID
+            riaecs::ReadOnlyObject<riaecs::IComponentFactory> factory = componentFactoryRegistry_->Get(componentID);
 
             // Free the component data which was allocated for this entity
             std::byte *componentData = entityComponentToData_[{entity, componentID}];
-            destroyer().Destroy(componentData);
+            factory().Destroy(componentData);
             componentAllocators_[componentID]->Free(componentData, *componentPools_[componentID]);
             entityComponentToData_.erase({entity, componentID});
         }
@@ -179,7 +167,7 @@ void riaecs::ECSWorld::AddComponent(const Entity &entity, size_t componentID)
         riaecs::NotifyError({"Failed to allocate memory for component"}, RIAECS_LOG_LOC);
 
     // Initialize the component using the factory
-    factory().Create(componentPtr);
+    componentPtr = factory().Create(componentPtr);
 
     // Store to the maps
     entityToComponents_[entity].insert(componentID);
@@ -206,12 +194,12 @@ void riaecs::ECSWorld::RemoveComponent(const Entity &entity, size_t componentID)
         it->second.erase(componentID);
         componentToEntities_[componentID].erase(entity);
 
-        // Get the component destroyer for the component ID
-        riaecs::ReadOnlyObject<IComponentDestroyer> destroyer = componentDestroyerRegistry_->Get(componentID);
+        // Get the component factory for the component ID
+        riaecs::ReadOnlyObject<riaecs::IComponentFactory> factory = componentFactoryRegistry_->Get(componentID);
 
         // Free the component data which was allocated for this entity
         std::byte *componentData = entityComponentToData_[{entity, componentID}];
-        destroyer().Destroy(componentData);
+        factory().Destroy(componentData);
         componentAllocators_[componentID]->Free(componentData, *componentPools_[componentID]);
         entityComponentToData_.erase({entity, componentID});
     }
