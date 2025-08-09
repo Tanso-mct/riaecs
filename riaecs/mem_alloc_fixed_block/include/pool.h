@@ -2,7 +2,6 @@
 #include "mem_alloc_fixed_block/include/dll_config.h"
 
 #include "riaecs/riaecs.h"
-#pragma comment(lib, "riaecs.lib")
 
 namespace mem_alloc_fixed_block
 {

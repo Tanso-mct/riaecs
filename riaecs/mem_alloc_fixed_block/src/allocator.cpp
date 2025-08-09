@@ -1,6 +1,8 @@
 ﻿#include "mem_alloc_fixed_block/src/pch.h"
 #include "mem_alloc_fixed_block/include/allocator.h"
 
+#pragma comment(lib, "riaecs.lib")
+
 mem_alloc_fixed_block::FixedBlockAllocator::FixedBlockAllocator(riaecs::IPool &pool, size_t blockSize)
 : BLOCK_SIZE_(blockSize)
 {
