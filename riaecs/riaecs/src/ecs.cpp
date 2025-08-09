@@ -78,8 +78,9 @@ void riaecs::ECSWorld::DestroyWorld()
         riaecs::NotifyError({"ECSWorld is not ready"}, RIAECS_LOG_LOC);
 
     // Destroy all entities
-    for (Entity entity = 0; entity < entityExistFlags_.size(); ++entity)
-        DestroyEntity(entity);
+    for (size_t index = 0; index < entityExistFlags_.size(); ++index)
+        if (entityExistFlags_[index])
+            DestroyEntity(entities_[index]);
 
     std::unique_lock<std::shared_mutex> lock(mutex_);
 
@@ -112,29 +113,32 @@ riaecs::Entity riaecs::ECSWorld::CreateEntity()
         Entity entity = freeEntities_.back();
         freeEntities_.pop_back();
 
-        entityExistFlags_[entity] = true;
-        return entity;
+        entityExistFlags_[entity.GetIndex()] = true;
+        entities_[entity.GetIndex()] = Entity(entity.GetIndex(), entity.GetGeneration() + 1);
+
+        return entities_[entity.GetIndex()];
     }
     else
     {
-        Entity entity = entityExistFlags_.size();
+        size_t index = entityExistFlags_.size();
         entityExistFlags_.push_back(true);
+        entities_.push_back(Entity(index, riaecs::ID_DEFAULT_GENERATION));
 
-        return entity;
+        return entities_.back();
     }
 }
 
-void riaecs::ECSWorld::DestroyEntity(Entity entity)
+void riaecs::ECSWorld::DestroyEntity(const Entity &entity)
 {
     std::unique_lock<std::shared_mutex> lock(mutex_);
 
     if (!isReady_)
         riaecs::NotifyError({"ECSWorld is not ready"}, RIAECS_LOG_LOC);
 
-    if (entity >= entityExistFlags_.size())
+    if (entity.GetIndex() >= entityExistFlags_.size())
         riaecs::NotifyError({"Entity index out of range"}, RIAECS_LOG_LOC);
 
-    if (!entityExistFlags_[entity])
+    if (!entityExistFlags_[entity.GetIndex()])
         return; // Already destroyed this entity
     
     // Remove all components associated with the entity
@@ -164,20 +168,20 @@ void riaecs::ECSWorld::DestroyEntity(Entity entity)
     freeEntities_.push_back(entity);
 
     // Update the entityExistFlags to mark it as not existing
-    entityExistFlags_[entity] = false;
+    entityExistFlags_[entity.GetIndex()] = false;
 }
 
-void riaecs::ECSWorld::AddComponent(Entity entity, size_t componentID)
+void riaecs::ECSWorld::AddComponent(const Entity &entity, size_t componentID)
 {
     std::unique_lock<std::shared_mutex> lock(mutex_);
 
     if (!isReady_)
         riaecs::NotifyError({"ECSWorld is not ready"}, RIAECS_LOG_LOC);
 
-    if (entity >= entityExistFlags_.size())
+    if (entity.GetIndex() >= entityExistFlags_.size())
         riaecs::NotifyError({"Entity index out of range"}, RIAECS_LOG_LOC);
 
-    if (!entityExistFlags_[entity])
+    if (!entityExistFlags_[entity.GetIndex()])
         riaecs::NotifyError({"Entity does not exist"}, RIAECS_LOG_LOC);
 
     if (componentID >= componentPools_.size())
@@ -205,17 +209,17 @@ void riaecs::ECSWorld::AddComponent(Entity entity, size_t componentID)
     entityComponentToData_[{entity, componentID}] = componentPtr;
 }
 
-void riaecs::ECSWorld::RemoveComponent(Entity entity, size_t componentID)
+void riaecs::ECSWorld::RemoveComponent(const Entity &entity, size_t componentID)
 {
     std::unique_lock<std::shared_mutex> lock(mutex_);
 
     if (!isReady_)
         riaecs::NotifyError({"ECSWorld is not ready"}, RIAECS_LOG_LOC);
 
-    if (entity >= entityExistFlags_.size())
+    if (entity.GetIndex() >= entityExistFlags_.size())
         riaecs::NotifyError({"Entity index out of range"}, RIAECS_LOG_LOC);
 
-    if (!entityExistFlags_[entity])
+    if (!entityExistFlags_[entity.GetIndex()])
         riaecs::NotifyError({"Entity does not exist"}, RIAECS_LOG_LOC);
 
     if (componentID >= componentPools_.size())
@@ -240,17 +244,17 @@ void riaecs::ECSWorld::RemoveComponent(Entity entity, size_t componentID)
     }
 }
 
-bool riaecs::ECSWorld::HasComponent(Entity entity, size_t componentID) const
+bool riaecs::ECSWorld::HasComponent(const Entity &entity, size_t componentID) const
 {
     std::shared_lock<std::shared_mutex> lock(mutex_);
 
     if (!isReady_)
         riaecs::NotifyError({"ECSWorld is not ready"}, RIAECS_LOG_LOC);
 
-    if (entity >= entityExistFlags_.size())
+    if (entity.GetIndex() >= entityExistFlags_.size())
         riaecs::NotifyError({"Entity index out of range"}, RIAECS_LOG_LOC);
 
-    if (!entityExistFlags_[entity])
+    if (!entityExistFlags_[entity.GetIndex()])
         riaecs::NotifyError({"Entity does not exist"}, RIAECS_LOG_LOC);
 
     if (componentID >= componentPools_.size())
@@ -260,17 +264,17 @@ bool riaecs::ECSWorld::HasComponent(Entity entity, size_t componentID) const
     return it != entityToComponents_.end() && it->second.find(componentID) != it->second.end();
 }
 
-riaecs::ReadOnlyObject<std::byte*> riaecs::ECSWorld::GetComponent(Entity entity, size_t componentID)
+riaecs::ReadOnlyObject<std::byte*> riaecs::ECSWorld::GetComponent(const Entity &entity, size_t componentID)
 {
     std::shared_lock<std::shared_mutex> lock(mutex_);
 
     if (!isReady_)
         riaecs::NotifyError({"ECSWorld is not ready"}, RIAECS_LOG_LOC);
 
-    if (entity >= entityExistFlags_.size())
+    if (entity.GetIndex() >= entityExistFlags_.size())
         riaecs::NotifyError({"Entity index out of range"}, RIAECS_LOG_LOC);
 
-    if (!entityExistFlags_[entity])
+    if (!entityExistFlags_[entity.GetIndex()])
         riaecs::NotifyError({"Entity does not exist"}, RIAECS_LOG_LOC);
 
     if (componentID >= componentPools_.size())

@@ -11,7 +11,7 @@
 
 namespace riaecs
 {
-    using Entity = size_t;
+    using Entity = ID;
 
     using IComponentFactory = IFactory<std::byte*, std::byte*>;
     using IComponentFactoryRegistry = IRegistry<IComponentFactory>;
@@ -33,18 +33,18 @@ namespace riaecs
         virtual void DestroyWorld() = 0;
 
         virtual Entity CreateEntity() = 0;
-        virtual void DestroyEntity(Entity entity) = 0;
+        virtual void DestroyEntity(const Entity &entity) = 0;
 
-        virtual void AddComponent(Entity entity, size_t componentID) = 0;
-        virtual void RemoveComponent(Entity entity, size_t componentID) = 0;
-        virtual bool HasComponent(Entity entity, size_t componentID) const = 0;
-        virtual ReadOnlyObject<std::byte*> GetComponent(Entity entity, size_t componentID) = 0;
+        virtual void AddComponent(const Entity &entity, size_t componentID) = 0;
+        virtual void RemoveComponent(const Entity &entity, size_t componentID) = 0;
+        virtual bool HasComponent(const Entity &entity, size_t componentID) const = 0;
+        virtual ReadOnlyObject<std::byte*> GetComponent(const Entity &entity, size_t componentID) = 0;
 
         virtual ReadOnlyObject<std::unordered_set<Entity>> View(size_t componentID) const = 0;
     };
 
     template <typename T>
-    ReadOnlyObject<T*> GetComponent(IECSWorld &world, Entity entity, size_t componentID)
+    ReadOnlyObject<T*> GetComponent(IECSWorld &world, const Entity &entity, size_t componentID)
     {
         ReadOnlyObject<std::byte*> componentData = world.GetComponent(entity, componentID);
         if (componentData() == nullptr)

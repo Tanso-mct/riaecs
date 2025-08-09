@@ -83,7 +83,7 @@ TEST(ECS, World)
 
     // Create entity 1
     riaecs::Entity entity1 = ecsWorld->CreateEntity();
-    EXPECT_EQ(entity1, 0);
+    EXPECT_EQ(entity1.GetIndex(), 0);
 
     // Add component to entity 1
     ecsWorld->AddComponent(entity1, componentID);
@@ -108,14 +108,14 @@ TEST(ECS, World)
 
     // Create entity 2
     riaecs::Entity entity2 = ecsWorld->CreateEntity();
-    EXPECT_EQ(entity2, 1);
+    EXPECT_EQ(entity2.GetIndex(), 1);
 
     // Destroy entity 1
     ecsWorld->DestroyEntity(entity1);
 
     // Re create entity
     riaecs::Entity entity3 = ecsWorld->CreateEntity();
-    EXPECT_EQ(entity3, 0);
+    EXPECT_EQ(entity3.GetIndex(), 0);
 
     ecsWorld->DestroyWorld();
 }

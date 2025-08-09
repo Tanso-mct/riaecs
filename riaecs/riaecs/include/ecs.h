@@ -25,7 +25,8 @@ namespace riaecs
         mutable bool isReady_ = false;
 
         std::vector<bool> entityExistFlags_;
-        std::vector<size_t> freeEntities_;
+        std::vector<Entity> entities_;
+        std::vector<Entity> freeEntities_;
 
         std::vector<std::unique_ptr<IPool>> componentPools_;
         std::vector<std::unique_ptr<IAllocator>> componentAllocators_;
@@ -49,12 +50,12 @@ namespace riaecs
         void DestroyWorld() override;
 
         Entity CreateEntity() override;
-        void DestroyEntity(Entity entity) override;
+        void DestroyEntity(const Entity &entity) override;
 
-        void AddComponent(Entity entity, size_t componentID) override;
-        void RemoveComponent(Entity entity, size_t componentID) override;
-        bool HasComponent(Entity entity, size_t componentID) const override;
-        ReadOnlyObject<std::byte*> GetComponent(Entity entity, size_t componentID) override;
+        void AddComponent(const Entity &entity, size_t componentID) override;
+        void RemoveComponent(const Entity &entity, size_t componentID) override;
+        bool HasComponent(const Entity &entity, size_t componentID) const override;
+        ReadOnlyObject<std::byte*> GetComponent(const Entity &entity, size_t componentID) override;
 
         ReadOnlyObject<std::unordered_set<Entity>> View(size_t componentID) const override;
     };
