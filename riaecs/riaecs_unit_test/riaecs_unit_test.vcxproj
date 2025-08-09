@@ -137,6 +137,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\mem_alloc_fixed_block\mem_alloc_fixed_block.vcxproj">
+      <Project>{c5895147-47e8-47ce-9cf8-b4bee2a2524f}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\riaecs\riaecs.vcxproj">
       <Project>{ca1b6480-e0d8-4ef7-bcc8-87b2a51b9f20}</Project>
     </ProjectReference>

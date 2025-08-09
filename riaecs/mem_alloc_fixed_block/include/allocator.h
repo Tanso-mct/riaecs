@@ -5,15 +5,15 @@
 
 namespace mem_alloc_fixed_block
 {
-    struct FixedFreeBlock
-    {
-        FixedFreeBlock *next;
-    };
-
     class MEM_ALLOC_FIXED_BLOCK_API FixedBlockAllocator : public riaecs::IAllocator
     {
     private:
-        FixedFreeBlock *freeList_ = nullptr;
+        struct FreeBlock
+        {
+            FreeBlock *next;
+        };
+    
+        FreeBlock *freeList_ = nullptr;
         const size_t BLOCK_SIZE_;
 
     public:
@@ -31,17 +31,18 @@ namespace mem_alloc_fixed_block
         void Free(std::byte *ptr, riaecs::IPool &pool) override;
     };
 
-    template <typename T>
-    void FreeObject(T *&ptr, riaecs::IAllocator &allocator, riaecs::IPool &pool)
+    class MEM_ALLOC_FIXED_BLOCK_API FixedBlockAllocatorFactory : public riaecs::IAllocatorFactory
     {
-        if (ptr != nullptr)
-        {
-            ptr->~T(); // Call destructor explicitly
-            allocator.Free(reinterpret_cast<std::byte*>(ptr), pool);
-            ptr = nullptr; // Reset pointer to avoid dangling pointer
-        }
-    }
+    public:
+        FixedBlockAllocatorFactory() = default;
+        ~FixedBlockAllocatorFactory() override = default;
 
-    size_t MEM_ALLOC_FIXED_BLOCK_API EnsureMinBlockSize(size_t size);
+        /***************************************************************************************************************
+         * IAllocatorFactory Implementation
+        /**************************************************************************************************************/
+
+        std::unique_ptr<riaecs::IAllocator> Create(riaecs::IPool &pool, size_t blockSize) const override;
+        size_t GetProductSize() const override { return sizeof(FixedBlockAllocator); }
+    };
 
 } // namespace mem_alloc_fixed_block

@@ -5,14 +5,14 @@
 
 namespace mem_alloc_fixed_block
 {
-    template <size_t SIZE>
-    class FixedBlockPool : public riaecs::IPool
+    class MEM_ALLOC_FIXED_BLOCK_API FixedBlockPool : public riaecs::IPool
     {
     private:
-        std::byte pool[SIZE];
+        const size_t SIZE;
+        std::unique_ptr<std::byte[]> pool_;
 
     public:
-        FixedBlockPool() = default;
+        FixedBlockPool(const size_t size);
         ~FixedBlockPool() override = default;
 
         FixedBlockPool(const FixedBlockPool&) = delete;
@@ -22,8 +22,22 @@ namespace mem_alloc_fixed_block
          * IPool Implementation
         /**************************************************************************************************************/
 
-        std::byte *GetPool() override { return pool; }
+        std::byte *GetPool() override { return pool_.get(); }
         size_t GetSize() const override { return SIZE; }
+    };
+
+    class MEM_ALLOC_FIXED_BLOCK_API FixedBlockPoolFactory : public riaecs::IPoolFactory
+    {
+    public:
+        FixedBlockPoolFactory() = default;
+        ~FixedBlockPoolFactory() override = default;
+
+        /***************************************************************************************************************
+         * IPoolFactory Implementation
+        /**************************************************************************************************************/
+
+        std::unique_ptr<riaecs::IPool> Create(size_t size) const override;
+        size_t GetProductSize() const override { return sizeof(FixedBlockPool); }
     };
 
 } // namespace mem_alloc_fixed_block

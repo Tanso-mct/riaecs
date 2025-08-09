@@ -13,6 +13,7 @@ namespace riaecs
     {
     private:
         std::unique_ptr<IComponentFactoryRegistry> componentFactoryRegistry_ = nullptr;
+        std::unique_ptr<IComponentDestroyerRegistry> componentDestroyerRegistry_ = nullptr;
         std::unique_ptr<IPoolFactory> poolFactory_ = nullptr;
         std::unique_ptr<IAllocatorFactory> allocatorFactory_ = nullptr;
         mutable bool isReady_ = false;
@@ -32,6 +33,7 @@ namespace riaecs
         virtual ~ECSWorld() = default;
 
         void SetComponentFactoryRegistry(std::unique_ptr<IComponentFactoryRegistry> registry) override;
+        void SetComponentDestroyerRegistry(std::unique_ptr<IComponentDestroyerRegistry> registry) override;
         void SetPoolFactory(std::unique_ptr<IPoolFactory> poolFactory) override;
         void SetAllocatorFactory(std::unique_ptr<IAllocatorFactory> allocatorFactory) override;
         bool IsReady() const override;

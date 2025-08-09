@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "riaecs/include/types/id.h"
+#include "riaecs/include/types/object.h"
 #include "riaecs/include/interfaces/registry.h"
 #include "riaecs/include/interfaces/factory.h"
 #include "riaecs/include/interfaces/memory.h"
@@ -11,11 +12,20 @@
 namespace riaecs
 {
     using Entity = ID;
-    using IComponentFactory = IFactory<void*, void*>;
+
+    using IComponentFactory = IFactory<void, std::byte*>;
     using IComponentFactoryRegistry = IRegistry<IComponentFactory>;
 
+    class IComponentDestroyer
+    {
+    public:
+        virtual ~IComponentDestroyer() = default;
+        virtual void Destroy(std::byte *componentData) const = 0;
+    };
+    using IComponentDestroyerRegistry = IRegistry<IComponentDestroyer>;
+
     using IPoolFactory = IFactory<std::unique_ptr<IPool>, size_t>;
-    using IAllocatorFactory = IFactory<std::unique_ptr<IAllocator>, IPool&>;
+    using IAllocatorFactory = IFactory<std::unique_ptr<IAllocator>, IPool&, size_t>;
 
     class IECSWorld
     {
@@ -23,6 +33,7 @@ namespace riaecs
         virtual ~IECSWorld() = default;
 
         virtual void SetComponentFactoryRegistry(std::unique_ptr<IComponentFactoryRegistry> registry) = 0;
+        virtual void SetComponentDestroyerRegistry(std::unique_ptr<IComponentDestroyerRegistry> registry) = 0;
         virtual void SetPoolFactory(std::unique_ptr<IPoolFactory> poolFactory) = 0;
         virtual void SetAllocatorFactory(std::unique_ptr<IAllocatorFactory> allocatorFactory) = 0;
         virtual bool IsReady() const = 0;

@@ -2,6 +2,8 @@
 
 namespace riaecs
 {
+    constexpr size_t MAX_FREE_BLOCK_SIZE = sizeof(void*) * 4;
+
     class IPool
     {
     public:
