@@ -8,17 +8,21 @@ namespace riaecs
 
     class ID
     {
+    private:
+        size_t index_;
+        size_t generation_;
+
     public:
         ID(size_t index, size_t generation) : index_(index), generation_(generation) {}
         ID() = delete;
         ~ID() = default;
 
-        const size_t index_;
-        const size_t generation_;
+        size_t GetIndex() const { return index_; }
+        size_t GetGeneration() const { return generation_; }
 
         bool operator==(const ID &other) const
         {
-            return index_ == other.index_ && generation_ == other.generation_;
+            return index_ == other.index_ && GetGeneration() == other.GetGeneration();
         }
     };
 
@@ -31,7 +35,7 @@ namespace std
     {
         std::size_t operator()(const riaecs::ID &id) const noexcept 
         {
-            return std::hash<size_t>()(id.index_) ^ (std::hash<size_t>()(id.generation_) << 1);
+            return std::hash<size_t>()(id.GetIndex()) ^ (std::hash<size_t>()(id.GetGeneration()) << 1);
         }
     };
 }

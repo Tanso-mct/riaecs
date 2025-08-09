@@ -68,3 +68,8 @@ std::unique_ptr<riaecs::IAllocator> mem_alloc_fixed_block::FixedBlockAllocatorFa
 {
     return std::make_unique<mem_alloc_fixed_block::FixedBlockAllocator>(pool, blockSize);
 }
+
+void mem_alloc_fixed_block::FixedBlockAllocatorFactory::Destroy(std::unique_ptr<riaecs::IAllocator> product) const
+{
+    product.reset();
+}

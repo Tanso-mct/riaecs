@@ -37,6 +37,8 @@ namespace mem_alloc_fixed_block
         /**************************************************************************************************************/
 
         std::unique_ptr<riaecs::IPool> Create(size_t size) const override;
+        void Destroy(std::unique_ptr<riaecs::IPool> product) const override;
+
         size_t GetProductSize() const override { return sizeof(FixedBlockPool); }
     };
 

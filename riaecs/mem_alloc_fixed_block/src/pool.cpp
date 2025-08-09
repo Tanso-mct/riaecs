@@ -13,3 +13,8 @@ std::unique_ptr<riaecs::IPool> mem_alloc_fixed_block::FixedBlockPoolFactory::Cre
 {
     return std::make_unique<mem_alloc_fixed_block::FixedBlockPool>(size);
 }
+
+void mem_alloc_fixed_block::FixedBlockPoolFactory::Destroy(std::unique_ptr<riaecs::IPool> product) const
+{
+    product.reset();
+}

@@ -73,7 +73,7 @@ TEST(Container, Use)
         const size_t NEW_OBJECT_VALUE = 200;
         std::unique_ptr<TestObject> newObject = std::make_unique<TestObject>(NEW_OBJECT_VALUE);
         riaecs::ID newID = container.Add(std::move(newObject));
-        EXPECT_EQ(newID.index_, ERASE_INDEX);
+        EXPECT_EQ(newID.GetIndex(), ERASE_INDEX);
 
         EXPECT_EQ(container.Contains(newID), true);
         EXPECT_EQ(container.Get(newID)().value, NEW_OBJECT_VALUE);
