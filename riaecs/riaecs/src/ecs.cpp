@@ -3,7 +3,7 @@
 
 #include "riaecs/include/utilities.h"
 
-void riaecs::ECSWorld::SetComponentFactoryRegistry(std::unique_ptr<ComponentFactoryRegistry> registry)
+void riaecs::ECSWorld::SetComponentFactoryRegistry(std::unique_ptr<IComponentFactoryRegistry> registry)
 {
     componentFactoryRegistry_ = std::move(registry);
 }
@@ -43,6 +43,47 @@ bool riaecs::ECSWorld::IsReady() const
 
     isReady_ = true;
     return isReady_;
+}
+
+void riaecs::ECSWorld::CreateWorld()
+{
+    if (!IsReady())
+        riaecs::NotifyError({"ECSWorld is not ready"}, RIAECS_LOG_LOC);
+
+    // Initialize component pools and allocators
+    size_t componentCount = componentFactoryRegistry_->GetCount();
+    componentPools_.resize(componentCount);
+    componentAllocators_.resize(componentCount);
+
+    for (size_t i = 0; i < componentCount; ++i)
+    {
+        riaecs::ReadOnlyObject<IComponentFactory> factory = componentFactoryRegistry_->Get(i);
+
+        componentPools_[i] = poolFactory_->Create(factory().GetProductSize());
+        componentAllocators_[i] = allocatorFactory_->Create(*componentPools_[i]);
+    }
+}
+
+void riaecs::ECSWorld::DestroyWorld()
+{
+    if (!IsReady())
+        riaecs::NotifyError({"ECSWorld is not ready"}, RIAECS_LOG_LOC);
+
+    // Clear all component data
+    entityComponentToData_.clear();
+    entityToComponents_.clear();
+    componentToEntities_.clear();
+
+    // Clear pools and allocators
+    componentPools_.clear();
+    componentAllocators_.clear();
+
+    // Reset entity management
+    nextEntityIndex_ = 0;
+    freeEntityIDs_.clear();
+
+    // Reset ready state
+    isReady_ = false;
 }
 
 riaecs::Entity riaecs::ECSWorld::CreateEntity()
@@ -111,7 +152,7 @@ void riaecs::ECSWorld::AddComponent(const Entity &entity, size_t componentID)
         riaecs::NotifyError({"Component pool or allocator not initialized for component ID"}, RIAECS_LOG_LOC);
 
     // Get the component factory for the component ID
-    riaecs::ReadOnlyObject<riaecs::ComponentFactory> factory = componentFactoryRegistry_->Get(componentID);
+    riaecs::ReadOnlyObject<riaecs::IComponentFactory> factory = componentFactoryRegistry_->Get(componentID);
 
     // Allocate memory for the component using the allocator
     std::byte *componentPtr 

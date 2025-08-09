@@ -166,6 +166,7 @@
     <ClInclude Include="include\types\stl_euqal.h" />
     <ClInclude Include="include\types\stl_hash.h" />
     <ClInclude Include="include\utilities.h" />
+    <ClInclude Include="riaecs.h" />
     <ClInclude Include="src\pch.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

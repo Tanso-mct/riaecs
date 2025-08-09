@@ -86,5 +86,8 @@
     <ClInclude Include="include\types\stl_hash.h">
       <Filter>ヘッダー ファイル\types</Filter>
     </ClInclude>
+    <ClInclude Include="riaecs.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

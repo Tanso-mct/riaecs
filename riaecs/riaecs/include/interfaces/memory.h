@@ -17,7 +17,7 @@ namespace riaecs
         virtual ~IAllocator() = default;
 
         virtual std::byte *Malloc(size_t size, IPool &pool) = 0;
-        virtual void Free(std::byte* ptr, IPool &pool) = 0;
+        virtual void Free(std::byte *ptr, IPool &pool) = 0;
     };
 
 } // namespace riaecs

@@ -11,21 +11,24 @@
 namespace riaecs
 {
     using Entity = ID;
-    using ComponentFactory = IFactory<void*, void*>;
-    using ComponentFactoryRegistry = IRegistry<ComponentFactory>;
+    using IComponentFactory = IFactory<void*, void*>;
+    using IComponentFactoryRegistry = IRegistry<IComponentFactory>;
 
-    using IPoolFactory = IFactory<IPool>;
-    using IAllocatorFactory = IFactory<IAllocator>;
+    using IPoolFactory = IFactory<std::unique_ptr<IPool>, size_t>;
+    using IAllocatorFactory = IFactory<std::unique_ptr<IAllocator>, IPool&>;
 
     class IECSWorld
     {
     public:
         virtual ~IECSWorld() = default;
 
-        virtual void SetComponentFactoryRegistry(std::unique_ptr<ComponentFactoryRegistry> registry) = 0;
+        virtual void SetComponentFactoryRegistry(std::unique_ptr<IComponentFactoryRegistry> registry) = 0;
         virtual void SetPoolFactory(std::unique_ptr<IPoolFactory> poolFactory) = 0;
         virtual void SetAllocatorFactory(std::unique_ptr<IAllocatorFactory> allocatorFactory) = 0;
         virtual bool IsReady() const = 0;
+
+        virtual void CreateWorld() = 0;
+        virtual void DestroyWorld() = 0;
 
         virtual Entity CreateEntity() = 0;
         virtual void DestroyEntity(const Entity &entity) = 0;
