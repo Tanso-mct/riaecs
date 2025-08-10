@@ -13,6 +13,7 @@
 namespace riaecs
 {
     using ComponentFactoryRegistry = Registry<IComponentFactory>;
+    using ComponentMaxCountRegistry = Registry<size_t>;
 
     class RIAECS_API ECSWorld : public IECSWorld
     {
@@ -20,6 +21,7 @@ namespace riaecs
         mutable std::shared_mutex mutex_;
 
         std::unique_ptr<IComponentFactoryRegistry> componentFactoryRegistry_ = nullptr;
+        std::unique_ptr<IComponentMaxCountRegistry> componentMaxCountRegistry_ = nullptr;
         std::unique_ptr<IPoolFactory> poolFactory_ = nullptr;
         std::unique_ptr<IAllocatorFactory> allocatorFactory_ = nullptr;
         mutable bool isReady_ = false;
@@ -44,6 +46,7 @@ namespace riaecs
         void SetComponentFactoryRegistry(std::unique_ptr<IComponentFactoryRegistry> registry) override;
         void SetPoolFactory(std::unique_ptr<IPoolFactory> poolFactory) override;
         void SetAllocatorFactory(std::unique_ptr<IAllocatorFactory> allocatorFactory) override;
+        void SetComponentMaxCountRegistry(std::unique_ptr<IComponentMaxCountRegistry> registry) override;
         bool IsReady() const override;
 
         void CreateWorld() override;

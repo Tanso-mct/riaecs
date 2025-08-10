@@ -21,6 +21,12 @@ void riaecs::ECSWorld::SetAllocatorFactory(std::unique_ptr<IAllocatorFactory> al
     allocatorFactory_ = std::move(allocatorFactory);
 }
 
+void riaecs::ECSWorld::SetComponentMaxCountRegistry(std::unique_ptr<IComponentMaxCountRegistry> registry)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    componentMaxCountRegistry_ = std::move(registry);
+}
+
 bool riaecs::ECSWorld::IsReady() const
 {
     std::shared_lock<std::shared_mutex> lock(mutex_);
@@ -46,6 +52,13 @@ bool riaecs::ECSWorld::IsReady() const
         return isReady_;
     }
 
+    if (!componentMaxCountRegistry_)
+    {
+        riaecs::NotifyError({"ComponentMaxCountRegistry is not set"}, RIAECS_LOG_LOC);
+        isReady_ = false;
+        return isReady_;
+    }
+
     isReady_ = true;
     return isReady_;
 }
@@ -65,9 +78,10 @@ void riaecs::ECSWorld::CreateWorld()
     for (size_t i = 0; i < componentCount; ++i)
     {
         riaecs::ReadOnlyObject<IComponentFactory> factory = componentFactoryRegistry_->Get(i);
+        riaecs::ReadOnlyObject<size_t> maxCount = componentMaxCountRegistry_->Get(i);
 
         size_t blockSize = std::max(factory().GetProductSize(), riaecs::MAX_FREE_BLOCK_SIZE);
-        componentPools_[i] = poolFactory_->Create(blockSize);
+        componentPools_[i] = poolFactory_->Create(blockSize * maxCount());
         componentAllocators_[i] = allocatorFactory_->Create(*componentPools_[i], blockSize);
     }
 }
@@ -195,6 +209,9 @@ void riaecs::ECSWorld::AddComponent(const Entity &entity, size_t componentID)
 
     if (componentPools_[componentID] == nullptr || componentAllocators_[componentID] == nullptr)
         riaecs::NotifyError({"Component pool or allocator not initialized for component ID"}, RIAECS_LOG_LOC);
+
+    if (entityToComponents_[entity].find(componentID) != entityToComponents_[entity].end())
+        riaecs::NotifyError({"Entity already has this component"}, RIAECS_LOG_LOC);
 
     // Get the component factory for the component ID
     riaecs::ReadOnlyObject<riaecs::IComponentFactory> factory = componentFactoryRegistry_->Get(componentID);

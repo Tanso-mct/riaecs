@@ -16,6 +16,8 @@ namespace riaecs
     using IComponentFactory = IFactory<std::byte*, std::byte*>;
     using IComponentFactoryRegistry = IRegistry<IComponentFactory>;
 
+    using IComponentMaxCountRegistry = IRegistry<size_t>;
+
     using IPoolFactory = IFactory<std::unique_ptr<IPool>, size_t>;
     using IAllocatorFactory = IFactory<std::unique_ptr<IAllocator>, IPool&, size_t>;
 
@@ -25,6 +27,7 @@ namespace riaecs
         virtual ~IECSWorld() = default;
 
         virtual void SetComponentFactoryRegistry(std::unique_ptr<IComponentFactoryRegistry> registry) = 0;
+        virtual void SetComponentMaxCountRegistry(std::unique_ptr<IComponentMaxCountRegistry> registry) = 0;
         virtual void SetPoolFactory(std::unique_ptr<IPoolFactory> poolFactory) = 0;
         virtual void SetAllocatorFactory(std::unique_ptr<IAllocatorFactory> allocatorFactory) = 0;
         virtual bool IsReady() const = 0;
