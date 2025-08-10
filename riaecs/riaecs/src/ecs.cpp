@@ -138,6 +138,9 @@ void riaecs::ECSWorld::DestroyEntity(const Entity &entity)
     if (entity.GetIndex() >= entityExistFlags_.size())
         riaecs::NotifyError({"Entity index out of range"}, RIAECS_LOG_LOC);
 
+    if (entities_[entity.GetIndex()].GetGeneration() != entity.GetGeneration())
+        riaecs::NotifyError({"Entity generation mismatch"}, RIAECS_LOG_LOC);
+
     if (!entityExistFlags_[entity.GetIndex()])
         return; // Already destroyed this entity
     
@@ -184,6 +187,9 @@ void riaecs::ECSWorld::AddComponent(const Entity &entity, size_t componentID)
     if (!entityExistFlags_[entity.GetIndex()])
         riaecs::NotifyError({"Entity does not exist"}, RIAECS_LOG_LOC);
 
+    if (entities_[entity.GetIndex()].GetGeneration() != entity.GetGeneration())
+        riaecs::NotifyError({"Entity generation mismatch"}, RIAECS_LOG_LOC);
+
     if (componentID >= componentPools_.size())
         riaecs::NotifyError({"Component ID out of range"}, RIAECS_LOG_LOC);
 
@@ -222,6 +228,9 @@ void riaecs::ECSWorld::RemoveComponent(const Entity &entity, size_t componentID)
     if (!entityExistFlags_[entity.GetIndex()])
         riaecs::NotifyError({"Entity does not exist"}, RIAECS_LOG_LOC);
 
+    if (entities_[entity.GetIndex()].GetGeneration() != entity.GetGeneration())
+        riaecs::NotifyError({"Entity generation mismatch"}, RIAECS_LOG_LOC);
+
     if (componentID >= componentPools_.size())
         riaecs::NotifyError({"Component ID out of range"}, RIAECS_LOG_LOC);
 
@@ -257,6 +266,9 @@ bool riaecs::ECSWorld::HasComponent(const Entity &entity, size_t componentID) co
     if (!entityExistFlags_[entity.GetIndex()])
         riaecs::NotifyError({"Entity does not exist"}, RIAECS_LOG_LOC);
 
+    if (entities_[entity.GetIndex()].GetGeneration() != entity.GetGeneration())
+        riaecs::NotifyError({"Entity generation mismatch"}, RIAECS_LOG_LOC);
+
     if (componentID >= componentPools_.size())
         riaecs::NotifyError({"Component ID out of range"}, RIAECS_LOG_LOC);
 
@@ -276,6 +288,9 @@ riaecs::ReadOnlyObject<std::byte*> riaecs::ECSWorld::GetComponent(const Entity &
 
     if (!entityExistFlags_[entity.GetIndex()])
         riaecs::NotifyError({"Entity does not exist"}, RIAECS_LOG_LOC);
+
+    if (entities_[entity.GetIndex()].GetGeneration() != entity.GetGeneration())
+        riaecs::NotifyError({"Entity generation mismatch"}, RIAECS_LOG_LOC);
 
     if (componentID >= componentPools_.size())
         riaecs::NotifyError({"Component ID out of range"}, RIAECS_LOG_LOC);
