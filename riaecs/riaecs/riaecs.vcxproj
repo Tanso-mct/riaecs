@@ -151,13 +151,18 @@
     <ClCompile Include="src\utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\asset.h" />
     <ClInclude Include="include\container.h" />
     <ClInclude Include="include\dll_config.h" />
     <ClInclude Include="include\ecs.h" />
+    <ClInclude Include="include\file.h" />
     <ClInclude Include="include\global_registry.h" />
+    <ClInclude Include="include\interfaces\asset.h" />
     <ClInclude Include="include\interfaces\container.h" />
     <ClInclude Include="include\interfaces\ecs.h" />
     <ClInclude Include="include\interfaces\factory.h" />
+    <ClInclude Include="include\interfaces\file.h" />
+    <ClInclude Include="include\interfaces\loader.h" />
     <ClInclude Include="include\interfaces\memory.h" />
     <ClInclude Include="include\interfaces\registry.h" />
     <ClInclude Include="include\interfaces\system.h" />

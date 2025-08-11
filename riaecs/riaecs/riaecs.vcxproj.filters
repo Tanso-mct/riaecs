@@ -95,5 +95,20 @@
     <ClInclude Include="include\global_registry.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="include\interfaces\asset.h">
+      <Filter>ヘッダー ファイル\interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="include\interfaces\file.h">
+      <Filter>ヘッダー ファイル\interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="include\interfaces\loader.h">
+      <Filter>ヘッダー ファイル\interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asset.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="include\file.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
