@@ -1,6 +1,7 @@
 ﻿#include "riaecs_unit_test/pch.h"
 
 #include "riaecs/include/ecs.h"
+#include "riaecs/include/global_registry.h"
 #pragma comment(lib, "riaecs.lib")
 
 #include "mem_alloc_fixed_block/mem_alloc_fixed_block.h"
@@ -15,10 +16,6 @@ namespace
     constexpr double INITIAL_B_DOUBLE_VALUE = 2.718;
     constexpr const char* INITIAL_B_STRING_VALUE = "default";
 
-} // namespace
-
-TEST(ECS, World)
-{
     class TestAComponent
     {
     public:
@@ -35,30 +32,7 @@ TEST(ECS, World)
             value = 0; 
         }
     };
-
-    class TestAComponentFactory : public riaecs::IComponentFactory
-    {
-    public:
-        std::byte* Create(std::byte* data) const override
-        {
-            if (data == nullptr)
-                return nullptr;
-
-            TestAComponent* component = new(data) TestAComponent();
-            return reinterpret_cast<std::byte*>(component);
-        }
-
-        void Destroy(std::byte* data) const override
-        {
-            if (data == nullptr)
-                return;
-
-            TestAComponent* component = reinterpret_cast<TestAComponent*>(data);
-            component->~TestAComponent();
-        }
-
-        size_t GetProductSize() const override { return sizeof(TestAComponent); }
-    };
+    riaecs::ComponentRegistrar<TestAComponent, 10> TestAComponentID;
 
     class TestBComponent
     {
@@ -88,76 +62,17 @@ TEST(ECS, World)
             stringValue.clear(); 
         }
     };
+    riaecs::ComponentRegistrar<TestBComponent, 10> TestBComponentID;
 
-    class TestBComponentFactory : public riaecs::IComponentFactory
-    {
-    public:
-        std::byte* Create(std::byte* data) const override
-        {
-            if (data == nullptr)
-                return nullptr;
+} // namespace
 
-            TestBComponent* component = new(data) TestBComponent();
-            return reinterpret_cast<std::byte*>(component);
-        }
-
-        void Destroy(std::byte* data) const override
-        {
-            if (data == nullptr)
-                return;
-
-            TestBComponent* component = reinterpret_cast<TestBComponent*>(data);
-            component->~TestBComponent();
-        }
-
-        size_t GetProductSize() const override { return sizeof(TestBComponent); }
-    };
-
+TEST(ECS, World)
+{
     std::unique_ptr<riaecs::IECSWorld> ecsWorld = std::make_unique<riaecs::ECSWorld>();
-
-    size_t testAComponentID;
-    size_t testBComponentID;
-    {
-        std::unique_ptr<riaecs::IComponentFactoryRegistry> componentFactoryRegistry 
-        = std::make_unique<riaecs::ComponentFactoryRegistry>();
-
-        testAComponentID = componentFactoryRegistry->Add(std::make_unique<TestAComponentFactory>());
-        testBComponentID = componentFactoryRegistry->Add(std::make_unique<TestBComponentFactory>());
-
-        ecsWorld->SetComponentFactoryRegistry(std::move(componentFactoryRegistry));
-    }
-
-    {
-        std::unique_ptr<riaecs::IComponentMaxCountRegistry> componentMaxCountRegistry 
-        = std::make_unique<riaecs::ComponentMaxCountRegistry>();
-
-        componentMaxCountRegistry->Add(std::make_unique<size_t>(10)); // Max count for TestAComponent
-        componentMaxCountRegistry->Add(std::make_unique<size_t>(10)); // Max count for TestBComponent
-
-        ecsWorld->SetComponentMaxCountRegistry(std::move(componentMaxCountRegistry));
-    }
-
-    {
-        std::unique_ptr<riaecs::IPoolFactory> poolFactory 
-        = std::make_unique<mem_alloc_fixed_block::FixedBlockPoolFactory>();
-
-        ecsWorld->SetPoolFactory(std::move(poolFactory));
-    }
-
-    {
-        std::unique_ptr<riaecs::IPoolFactory> poolFactory 
-        = std::make_unique<mem_alloc_fixed_block::FixedBlockPoolFactory>();
-
-        ecsWorld->SetPoolFactory(std::move(poolFactory));
-    }
-
-    {
-        std::unique_ptr<riaecs::IAllocatorFactory> allocatorFactory 
-        = std::make_unique<mem_alloc_fixed_block::FixedBlockAllocatorFactory>();
-
-        ecsWorld->SetAllocatorFactory(std::move(allocatorFactory));
-    }
-
+    ecsWorld->SetComponentFactoryRegistry(std::move(riaecs::gComponentFactoryRegistry));
+    ecsWorld->SetComponentMaxCountRegistry(std::move(riaecs::gComponentMaxCountRegistry));
+    ecsWorld->SetPoolFactory(std::make_unique<mem_alloc_fixed_block::FixedBlockPoolFactory>());
+    ecsWorld->SetAllocatorFactory(std::make_unique<mem_alloc_fixed_block::FixedBlockAllocatorFactory>());
     EXPECT_TRUE(ecsWorld->IsReady());
 
     ecsWorld->CreateWorld();
@@ -167,28 +82,28 @@ TEST(ECS, World)
     EXPECT_EQ(entity1.GetIndex(), 0);
 
     // Add component to entity 1
-    ecsWorld->AddComponent(entity1, testAComponentID);
+    ecsWorld->AddComponent(entity1, TestAComponentID());
 
     {
         riaecs::Entity invalidGenerationEntity(0, 10);
-        EXPECT_THROW(ecsWorld->AddComponent(invalidGenerationEntity, testAComponentID), std::runtime_error);
+        EXPECT_THROW(ecsWorld->AddComponent(invalidGenerationEntity, TestAComponentID()), std::runtime_error);
 
         riaecs::Entity invalidIndexEntity(10, 0);
-        EXPECT_THROW(ecsWorld->AddComponent(invalidIndexEntity, testAComponentID), std::runtime_error);
+        EXPECT_THROW(ecsWorld->AddComponent(invalidIndexEntity, TestAComponentID()), std::runtime_error);
     }
 
     // Get component
     {
         riaecs::ReadOnlyObject<TestAComponent*> test 
-        = riaecs::GetComponent<TestAComponent>(*ecsWorld, entity1, testAComponentID);
+        = riaecs::GetComponent<TestAComponent>(*ecsWorld, entity1, TestAComponentID());
 
         EXPECT_NE(test(), nullptr);
         EXPECT_EQ(test()->value, INITIAL_A_VALUE);
 
-        for (riaecs::Entity entity : ecsWorld->View(testAComponentID)())
+        for (riaecs::Entity entity : ecsWorld->View(TestAComponentID())())
         {
             riaecs::ReadOnlyObject<TestAComponent*> testFromView 
-            = riaecs::GetComponent<TestAComponent>(*ecsWorld, entity, testAComponentID);
+            = riaecs::GetComponent<TestAComponent>(*ecsWorld, entity, TestAComponentID());
 
             EXPECT_NE(testFromView(), nullptr);
             EXPECT_EQ(testFromView()->value, INITIAL_A_VALUE);
@@ -200,16 +115,16 @@ TEST(ECS, World)
     EXPECT_EQ(entity2.GetIndex(), 1);
 
     // Add component to entity 2
-    ecsWorld->AddComponent(entity2, testAComponentID);
-    ecsWorld->AddComponent(entity2, testBComponentID);
+    ecsWorld->AddComponent(entity2, TestAComponentID());
+    ecsWorld->AddComponent(entity2, TestBComponentID());
 
     // Should throw because entity already has this component
-    EXPECT_THROW(ecsWorld->AddComponent(entity2, testAComponentID), std::runtime_error);
+    EXPECT_THROW(ecsWorld->AddComponent(entity2, TestAComponentID()), std::runtime_error);
 
     // Get component
     {
         riaecs::ReadOnlyObject<TestBComponent*> test 
-        = riaecs::GetComponent<TestBComponent>(*ecsWorld, entity2, testBComponentID);
+        = riaecs::GetComponent<TestBComponent>(*ecsWorld, entity2, TestBComponentID());
 
         EXPECT_NE(test(), nullptr);
         EXPECT_EQ(test()->intValue, INITIAL_B_INT_VALUE);
@@ -217,10 +132,10 @@ TEST(ECS, World)
         EXPECT_EQ(test()->doubleValue, INITIAL_B_DOUBLE_VALUE);
         EXPECT_EQ(test()->stringValue, INITIAL_B_STRING_VALUE);
 
-        for (riaecs::Entity entity : ecsWorld->View(testBComponentID)())
+        for (riaecs::Entity entity : ecsWorld->View(TestBComponentID())())
         {
             riaecs::ReadOnlyObject<TestBComponent*> testFromView 
-            = riaecs::GetComponent<TestBComponent>(*ecsWorld, entity, testBComponentID);
+            = riaecs::GetComponent<TestBComponent>(*ecsWorld, entity, TestBComponentID());
 
             EXPECT_NE(testFromView(), nullptr);
             EXPECT_EQ(testFromView()->intValue, INITIAL_B_INT_VALUE);
@@ -231,10 +146,10 @@ TEST(ECS, World)
     }
 
     size_t componentCount = 0;
-    for (riaecs::Entity entity : ecsWorld->View(testAComponentID)())
+    for (riaecs::Entity entity : ecsWorld->View(TestAComponentID())())
     {
         riaecs::ReadOnlyObject<TestAComponent*> testFromView 
-        = riaecs::GetComponent<TestAComponent>(*ecsWorld, entity, testAComponentID);
+        = riaecs::GetComponent<TestAComponent>(*ecsWorld, entity, TestAComponentID());
 
         EXPECT_NE(testFromView(), nullptr);
         EXPECT_EQ(testFromView()->value, INITIAL_A_VALUE);

@@ -24,8 +24,9 @@
  * Headers
 /**********************************************************************************************************************/
 
-#include "riaecs/include/registry.h"
+#include "riaecs/include/container.h"
 #include "riaecs/include/ecs.h"
-
-#include "riaecs/include/utilities.h"
+#include "riaecs/include/global_registry.h"
 #include "riaecs/include/log.h"
+#include "riaecs/include/registry.h"
+#include "riaecs/include/utilities.h"

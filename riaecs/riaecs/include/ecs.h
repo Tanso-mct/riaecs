@@ -63,4 +63,32 @@ namespace riaecs
         ReadOnlyObject<std::unordered_set<Entity>> View(size_t componentID) const override;
     };
 
+    template <typename T>
+    class ComponentFactory : public IComponentFactory
+    {
+    public:
+        std::byte *Create(std::byte *data) const override
+        {
+            if (data == nullptr)
+                return nullptr;
+
+            T* component = new(data) T();
+            return reinterpret_cast<std::byte*>(component);
+        }
+
+        void Destroy(std::byte *data) const override
+        {
+            if (data == nullptr)
+                return;
+
+            T* component = reinterpret_cast<T*>(data);
+            component->~T();
+        }
+
+        size_t GetProductSize() const override
+        {
+            return sizeof(T);
+        }
+    };
+
 } // namespace riaecs

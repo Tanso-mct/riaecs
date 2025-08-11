@@ -142,6 +142,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\ecs.cpp" />
+    <ClCompile Include="src\global_registry.cpp" />
     <ClCompile Include="src\log.cpp" />
     <ClCompile Include="src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -153,6 +154,7 @@
     <ClInclude Include="include\container.h" />
     <ClInclude Include="include\dll_config.h" />
     <ClInclude Include="include\ecs.h" />
+    <ClInclude Include="include\global_registry.h" />
     <ClInclude Include="include\interfaces\container.h" />
     <ClInclude Include="include\interfaces\ecs.h" />
     <ClInclude Include="include\interfaces\factory.h" />
