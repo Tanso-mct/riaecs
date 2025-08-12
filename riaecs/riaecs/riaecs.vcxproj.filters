@@ -74,9 +74,6 @@
     <ClInclude Include="include\interfaces\registry.h">
       <Filter>ヘッダー ファイル\interfaces</Filter>
     </ClInclude>
-    <ClInclude Include="include\interfaces\system.h">
-      <Filter>ヘッダー ファイル\interfaces</Filter>
-    </ClInclude>
     <ClInclude Include="include\ecs.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>

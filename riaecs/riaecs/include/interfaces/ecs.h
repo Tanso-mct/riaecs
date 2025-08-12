@@ -5,6 +5,7 @@
 #include "riaecs/include/interfaces/registry.h"
 #include "riaecs/include/interfaces/factory.h"
 #include "riaecs/include/interfaces/memory.h"
+#include "riaecs/include/interfaces/asset.h"
 
 #include <memory>
 #include <unordered_set>
@@ -56,5 +57,66 @@ namespace riaecs
         T* data = reinterpret_cast<T*>(componentData());
         return ReadOnlyObject<T*>(std::move(componentData.TakeLock()), data);
     }
+
+    class ISystemLoopCommandQueue;
+
+    class ISystem
+    {
+    public:
+        virtual ~ISystem() = default;
+
+        // If returns true, the system loop will continue to run
+        // If returns false, the system loop will stop
+        virtual bool Update
+        (
+            IECSWorld &world, IAssetContainer &assetCont, 
+            ISystemLoopCommandQueue &systemLoopCmdQueue
+        ) = 0;
+    };
+    using ISystemFactory = IFactory<std::unique_ptr<ISystem>>;
+    using ISystemFactoryRegistry = IRegistry<ISystemFactory>;
+
+    class ISystemList
+    {
+    public:
+        virtual ~ISystemList() = default;
+
+        virtual void Add(size_t systemID) = 0;
+        virtual const ISystem &Get(size_t index) = 0;
+        virtual size_t GetCount() const = 0;
+        virtual void Clear() = 0;
+    };
+    using ISystemListFactory = IFactory<std::unique_ptr<ISystemList>>;
+
+    class ISystemLoopCommand
+    {
+    public:
+        virtual ~ISystemLoopCommand() = default;
+        virtual void Execute(ISystemList &systemList, IECSWorld &world, IAssetContainer &assetCont) const = 0;
+    };
+
+    class ISystemLoopCommandQueue
+    {
+    public:
+        virtual ~ISystemLoopCommandQueue() = default;
+
+        virtual void Enqueue(std::unique_ptr<ISystemLoopCommand> cmd) = 0;
+        virtual std::unique_ptr<ISystemLoopCommand> Dequeue() = 0;
+        virtual bool IsEmpty() const = 0;
+    };
+    using ISystemLoopCommandQueueFactory = IFactory<std::unique_ptr<ISystemLoopCommandQueue>>;
+
+    class ISystemLoop
+    {
+    public:
+        virtual ~ISystemLoop() = default;
+
+        virtual void SetSystemListFactory(std::unique_ptr<ISystemListFactory> factory) = 0;
+        virtual void SetSystemLoopCommandQueueFactory(std::unique_ptr<ISystemLoopCommandQueueFactory> factory) = 0;
+        virtual bool IsReady() const = 0;
+
+        virtual void Initialize() = 0;
+        virtual void Run(IECSWorld &world, IAssetContainer &assetCont) = 0;
+    };
 
 } // namespace riaecs

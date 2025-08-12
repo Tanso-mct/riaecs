@@ -4,12 +4,14 @@
  * Interfaces
 /**********************************************************************************************************************/
 
+#include "riaecs/include/interfaces/asset.h"
 #include "riaecs/include/interfaces/container.h"
 #include "riaecs/include/interfaces/ecs.h"
 #include "riaecs/include/interfaces/factory.h"
+#include "riaecs/include/interfaces/file.h"
+#include "riaecs/include/interfaces/loader.h"
 #include "riaecs/include/interfaces/memory.h"
 #include "riaecs/include/interfaces/registry.h"
-#include "riaecs/include/interfaces/system.h"
 
 /***********************************************************************************************************************
  * Types
@@ -24,8 +26,10 @@
  * Headers
 /**********************************************************************************************************************/
 
+#include "riaecs/include/asset.h"
 #include "riaecs/include/container.h"
 #include "riaecs/include/ecs.h"
+#include "riaecs/include/file.h"
 #include "riaecs/include/global_registry.h"
 #include "riaecs/include/log.h"
 #include "riaecs/include/registry.h"

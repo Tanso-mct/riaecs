@@ -3,6 +3,7 @@
 #include "riaecs/include/interfaces/registry.h"
 #include "riaecs/include/interfaces/factory.h"
 #include "riaecs/include/interfaces/file.h"
+#include "riaecs/include/interfaces/container.h"
 
 #include <string>
 #include <string_view>
@@ -49,5 +50,7 @@ namespace riaecs
 
     using IAssetFactoryRegistry = IRegistry<IAssetFactory>;
     using IAssetSourceRegistry = IRegistry<AssetSource>;
+
+    using IAssetContainer = IContainer<IAsset>;
 
 } // namespace riaecs

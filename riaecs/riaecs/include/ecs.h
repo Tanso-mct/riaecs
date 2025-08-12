@@ -2,6 +2,7 @@
 #include "riaecs/include/dll_config.h"
 
 #include "riaecs/include/interfaces/ecs.h"
+#include "riaecs/include/interfaces/factory.h"
 #include "riaecs/include/types/stl_hash.h"
 #include "riaecs/include/types/stl_euqal.h"
 
@@ -9,6 +10,7 @@
 
 #include <unordered_map>
 #include <shared_mutex>
+#include <queue>
 
 namespace riaecs
 {
@@ -89,6 +91,130 @@ namespace riaecs
         {
             return sizeof(T);
         }
+    };
+
+    template <typename T>
+    class SystemFactory : public ISystemFactory
+    {
+    public:
+        SystemFactory() = default;
+        ~SystemFactory() override = default;
+
+        /***************************************************************************************************************
+         * IFactory Implementation
+        /**************************************************************************************************************/
+
+        std::unique_ptr<ISystem> Create() const override
+        {
+            return std::make_unique<T>();
+        }
+
+        void Destroy(std::unique_ptr<ISystem> product) const override
+        {
+            product.reset();
+        }
+
+        size_t GetProductSize() const override
+        {
+            return sizeof(T);
+        }
+    };
+
+    using SystemFactoryRegistry = Registry<ISystemFactory>;
+
+    class RIAECS_API SystemList : public ISystemList
+    {
+    private:
+        std::vector<size_t> systemIDs_;
+        mutable std::shared_mutex mutex_;
+
+    public:
+        SystemList() = default;
+        virtual ~SystemList() override = default;
+
+        /***************************************************************************************************************
+         * ISystemList Implementation
+        /**************************************************************************************************************/
+
+        void Add(size_t systemID) override;
+        const ISystem &Get(size_t index) override;
+        size_t GetCount() const override;
+        void Clear() override;
+    };
+
+    class RIAECS_API SystemListFactory : public ISystemListFactory
+    {
+    public:
+        SystemListFactory() = default;
+        ~SystemListFactory() override = default;
+
+        /***************************************************************************************************************
+         * IFactory Implementation
+        /**************************************************************************************************************/
+
+        std::unique_ptr<ISystemList> Create() const override;
+        void Destroy(std::unique_ptr<ISystemList> product) const override;
+        size_t GetProductSize() const override;
+    };
+
+    class RIAECS_API SystemLoopCommandQueue : public ISystemLoopCommandQueue
+    {
+    private:
+        std::queue<std::unique_ptr<ISystemLoopCommand>> commandQueue_;
+        mutable std::shared_mutex mutex_;
+
+    public:
+        SystemLoopCommandQueue() = default;
+        virtual ~SystemLoopCommandQueue() override = default;
+
+        /***************************************************************************************************************
+         * ISystemLoopCommandQueue Implementation
+        /**************************************************************************************************************/
+
+        void Enqueue(std::unique_ptr<ISystemLoopCommand> cmd) override;
+        std::unique_ptr<ISystemLoopCommand> Dequeue() override;
+        bool IsEmpty() const override;
+    };
+
+    class RIAECS_API SystemLoopCommandQueueFactory : public ISystemLoopCommandQueueFactory
+    {
+    public:
+        SystemLoopCommandQueueFactory() = default;
+        ~SystemLoopCommandQueueFactory() override = default;
+
+        /***************************************************************************************************************
+         * IFactory Implementation
+        /**************************************************************************************************************/
+
+        std::unique_ptr<ISystemLoopCommandQueue> Create() const override;
+        void Destroy(std::unique_ptr<ISystemLoopCommandQueue> product) const override;
+        size_t GetProductSize() const override;
+    };
+
+    class RIAECS_API SystemLoop : public ISystemLoop
+    {
+    private:
+        std::unique_ptr<ISystemListFactory> listFactory_;
+        std::unique_ptr<ISystemLoopCommandQueueFactory> loopCommandQueueFactory_;
+        mutable bool isReady_ = false;
+
+        std::unique_ptr<ISystemList> systemList_;
+        std::unique_ptr<ISystemLoopCommandQueue> commandQueue_;
+
+    public:
+        SystemLoop() = default;
+        virtual ~SystemLoop() override = default;
+
+        /***************************************************************************************************************
+         * ISystemLoop Implementation
+        /**************************************************************************************************************/
+
+        void SetSystemListFactory(std::unique_ptr<ISystemListFactory> factory) override;
+        void SetSystemLoopCommandQueueFactory(std::unique_ptr<ISystemLoopCommandQueueFactory> factory) override;
+        bool IsReady() const override;
+
+        void Initialize() override;
+        void Run(IECSWorld &world, IAssetContainer &assetCont) override;
     };
 
 } // namespace riaecs

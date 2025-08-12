@@ -165,7 +165,6 @@
     <ClInclude Include="include\interfaces\loader.h" />
     <ClInclude Include="include\interfaces\memory.h" />
     <ClInclude Include="include\interfaces\registry.h" />
-    <ClInclude Include="include\interfaces\system.h" />
     <ClInclude Include="include\log.h" />
     <ClInclude Include="include\registry.h" />
     <ClInclude Include="include\types\id.h" />

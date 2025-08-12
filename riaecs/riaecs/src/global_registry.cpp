@@ -7,6 +7,9 @@ RIAECS_API std::unique_ptr<riaecs::IComponentFactoryRegistry> riaecs::gComponent
 RIAECS_API std::unique_ptr<riaecs::IComponentMaxCountRegistry> riaecs::gComponentMaxCountRegistry 
 = std::make_unique<riaecs::ComponentMaxCountRegistry>();
 
+RIAECS_API std::unique_ptr<riaecs::ISystemFactoryRegistry> riaecs::gSystemFactoryRegistry 
+= std::make_unique<riaecs::SystemFactoryRegistry>();
+
 RIAECS_API std::unique_ptr<riaecs::IAssetFactoryRegistry> riaecs::gAssetFactoryRegistry 
 = std::make_unique<riaecs::AssetFactoryRegistry>();
 

@@ -31,6 +31,25 @@ namespace riaecs
         }
     };
 
+    extern RIAECS_API std::unique_ptr<ISystemFactoryRegistry> gSystemFactoryRegistry;
+    template <typename SYSTEM>
+    class SystemFactoryRegistrar
+    {
+    private:
+        size_t systemFactoryID_;
+
+    public:
+        SystemFactoryRegistrar()
+        {
+            systemFactoryID_ = gSystemFactoryRegistry->Add(std::make_unique<SystemFactory<SYSTEM>>());
+        }
+
+        size_t operator()() const
+        {
+            return systemFactoryID_;
+        }
+    };
+
     extern RIAECS_API std::unique_ptr<IAssetFactoryRegistry> gAssetFactoryRegistry;
     template <typename ASSET_FACTORY>
     class AssetFactoryRegistrar
