@@ -125,19 +125,22 @@ namespace riaecs
     class RIAECS_API SystemList : public ISystemList
     {
     private:
-        std::vector<size_t> systemIDs_;
+        std::vector<std::unique_ptr<ISystem>> systems_;
         mutable std::shared_mutex mutex_;
 
     public:
         SystemList() = default;
         virtual ~SystemList() override = default;
 
+        SystemList(const SystemList&) = delete;
+        SystemList& operator=(const SystemList&) = delete;
+
         /***************************************************************************************************************
          * ISystemList Implementation
         /**************************************************************************************************************/
 
         void Add(size_t systemID) override;
-        const ISystem &Get(size_t index) override;
+        ISystem &Get(size_t index) override;
         size_t GetCount() const override;
         void Clear() override;
     };
@@ -194,6 +197,8 @@ namespace riaecs
     class RIAECS_API SystemLoop : public ISystemLoop
     {
     private:
+        mutable std::shared_mutex mutex_;
+
         std::unique_ptr<ISystemListFactory> listFactory_;
         std::unique_ptr<ISystemLoopCommandQueueFactory> loopCommandQueueFactory_;
         mutable bool isReady_ = false;

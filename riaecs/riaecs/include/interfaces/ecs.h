@@ -82,7 +82,7 @@ namespace riaecs
         virtual ~ISystemList() = default;
 
         virtual void Add(size_t systemID) = 0;
-        virtual const ISystem &Get(size_t index) = 0;
+        virtual ISystem &Get(size_t index) = 0;
         virtual size_t GetCount() const = 0;
         virtual void Clear() = 0;
     };

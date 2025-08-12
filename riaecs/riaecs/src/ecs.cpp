@@ -2,6 +2,7 @@
 #include "riaecs/include/ecs.h"
 
 #include "riaecs/include/utilities.h"
+#include "riaecs/include/global_registry.h"
 
 void riaecs::ECSWorld::SetComponentFactoryRegistry(std::unique_ptr<IComponentFactoryRegistry> registry)
 {
@@ -334,4 +335,180 @@ riaecs::ReadOnlyObject<std::unordered_set<riaecs::Entity>> riaecs::ECSWorld::Vie
         return riaecs::ReadOnlyObject<std::unordered_set<riaecs::Entity>>(std::move(lock), it->second);
 
     return riaecs::ReadOnlyObject<std::unordered_set<riaecs::Entity>>(std::move(lock), emptyEntities_);
+}
+
+void riaecs::SystemList::Add(size_t systemID)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    
+    riaecs::ReadOnlyObject<riaecs::ISystemFactory> factory = riaecs::gSystemFactoryRegistry->Get(systemID);
+    std::unique_ptr<riaecs::ISystem> system = factory().Create();
+    systems_.emplace_back(std::move(system));
+}
+
+riaecs::ISystem &riaecs::SystemList::Get(size_t index)
+{
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+
+    if (index >= systems_.size())
+        riaecs::NotifyError({"System index out of range"}, RIAECS_LOG_LOC);
+
+    if (!systems_[index])
+        riaecs::NotifyError({"No system found at index: " + std::to_string(index)}, RIAECS_LOG_LOC);
+
+    return *systems_[index];
+}
+
+size_t riaecs::SystemList::GetCount() const
+{
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+    return systems_.size();
+}
+
+void riaecs::SystemList::Clear()
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    systems_.clear();
+}
+
+std::unique_ptr<riaecs::ISystemList> riaecs::SystemListFactory::Create() const
+{
+    return std::make_unique<riaecs::SystemList>();
+}
+
+void riaecs::SystemListFactory::Destroy(std::unique_ptr<ISystemList> product) const
+{
+    product.reset();
+}
+
+size_t riaecs::SystemListFactory::GetProductSize() const
+{
+    return sizeof(SystemList);
+}
+
+void riaecs::SystemLoopCommandQueue::Enqueue(std::unique_ptr<ISystemLoopCommand> cmd)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    commandQueue_.emplace(std::move(cmd));
+}
+
+std::unique_ptr<riaecs::ISystemLoopCommand> riaecs::SystemLoopCommandQueue::Dequeue()
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+
+    if (commandQueue_.empty())
+        return nullptr;
+
+    std::unique_ptr<ISystemLoopCommand> cmd = std::move(commandQueue_.front());
+    commandQueue_.pop();
+    return cmd;
+}
+
+bool riaecs::SystemLoopCommandQueue::IsEmpty() const
+{
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+    return commandQueue_.empty();
+}
+
+std::unique_ptr<riaecs::ISystemLoopCommandQueue> riaecs::SystemLoopCommandQueueFactory::Create() const
+{
+    return std::make_unique<SystemLoopCommandQueue>();
+}
+
+void riaecs::SystemLoopCommandQueueFactory::Destroy(std::unique_ptr<ISystemLoopCommandQueue> product) const
+{
+    product.reset();
+}
+
+size_t riaecs::SystemLoopCommandQueueFactory::GetProductSize() const
+{
+    return sizeof(SystemLoopCommandQueue);
+}
+
+void riaecs::SystemLoop::SetSystemListFactory(std::unique_ptr<ISystemListFactory> factory)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    listFactory_ = std::move(factory);
+}
+
+void riaecs::SystemLoop::SetSystemLoopCommandQueueFactory(std::unique_ptr<ISystemLoopCommandQueueFactory> factory)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    loopCommandQueueFactory_ = std::move(factory);
+}
+
+bool riaecs::SystemLoop::IsReady() const
+{
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+    
+    if (!listFactory_)
+    {
+        riaecs::NotifyError({"SystemListFactory is not set"}, RIAECS_LOG_LOC);
+        isReady_ = false;
+        return isReady_;
+    }
+
+    if (!loopCommandQueueFactory_)
+    {
+        riaecs::NotifyError({"SystemLoopCommandQueueFactory is not set"}, RIAECS_LOG_LOC);
+        isReady_ = false;
+        return isReady_;
+    }
+
+    isReady_ = true;
+    return isReady_;
+}
+
+void riaecs::SystemLoop::Initialize()
+{
+    if (!IsReady())
+        riaecs::NotifyError({"SystemLoop is not ready"}, RIAECS_LOG_LOC);
+
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+
+    systemList_ = listFactory_->Create();
+    commandQueue_ = loopCommandQueueFactory_->Create();
+
+    if (!systemList_)
+        riaecs::NotifyError({"Failed to create System List"}, RIAECS_LOG_LOC);
+
+    if (!commandQueue_)
+        riaecs::NotifyError({"Failed to create System Loop Command Queue"}, RIAECS_LOG_LOC);
+}
+
+void riaecs::SystemLoop::Run(IECSWorld &world, IAssetContainer &assetCont)
+{
+    if (!isReady_)
+        riaecs::NotifyError({"SystemLoop is not ready"}, RIAECS_LOG_LOC);
+
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+
+    while (true)
+    {
+        // Process commands in the command queue
+        while (!commandQueue_->IsEmpty())
+        {
+            std::unique_ptr<ISystemLoopCommand> cmd = commandQueue_->Dequeue();
+            if (cmd)
+                cmd->Execute(*systemList_, world, assetCont);
+            else
+                riaecs::NotifyError({"Invalid command in System Loop Command Queue"}, RIAECS_LOG_LOC);
+        }
+
+        if (systemList_->GetCount() == 0)
+            break; // Exit the loop if no systems are available
+
+        // Update systems
+        bool continueLoop = true;
+        for (size_t i = 0; i < systemList_->GetCount(); ++i)
+        {
+            ISystem &system = systemList_->Get(i);
+            continueLoop = system.Update(world, assetCont, *commandQueue_);
+            if (!continueLoop)
+                break; // Stop the system update if any system returns false
+        }
+
+        if (!continueLoop)
+            break; // Stop the system loop if any system returns false
+    }
 }
