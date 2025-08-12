@@ -26,9 +26,9 @@ namespace riaecs
     public:
         virtual ~IAssetFactory() = default;
         
-        virtual std::unique_ptr<IAssetStagingArea> Prepare() = 0;
-        virtual std::unique_ptr<IAsset> Create(const IFileData &fileData) const = 0;
-        virtual void Commit(IAssetStagingArea &stagingArea) = 0;
+        virtual std::unique_ptr<IAssetStagingArea> Prepare() const = 0;
+        virtual std::unique_ptr<IAsset> Create(const IFileData &fileData, IAssetStagingArea &stagingArea) const = 0;
+        virtual void Commit(IAssetStagingArea &stagingArea) const = 0;
     };
 
     class AssetSource

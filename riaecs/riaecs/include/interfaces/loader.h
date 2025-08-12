@@ -7,7 +7,7 @@ namespace riaecs
     {
     public:
         virtual ~ILoader() = default;
-        virtual DATA Load(ARGS...) = 0;
+        virtual DATA Load(ARGS...) const = 0;
     };
 
 } // namespace riaecs

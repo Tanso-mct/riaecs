@@ -17,6 +17,9 @@
     <ClCompile Include="tests\ecs_test.cpp">
       <Filter>tests</Filter>
     </ClCompile>
+    <ClCompile Include="tests\asset_test.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
