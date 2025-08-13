@@ -31,6 +31,10 @@ namespace riaecs
         std::vector<bool> entityExistFlags_;
         std::vector<Entity> entities_;
         std::vector<Entity> freeEntities_;
+        std::unordered_set<Entity> emptyEntities_;
+
+        static size_t nextRegisterIndex_;
+        std::unordered_map<size_t, Entity> registeredEntities_;
 
         std::vector<std::unique_ptr<IPool>> componentPools_;
         std::vector<std::unique_ptr<IAllocator>> componentAllocators_;
@@ -39,11 +43,18 @@ namespace riaecs
         std::unordered_map<size_t, std::unordered_set<Entity>> componentToEntities_;
         std::unordered_map<std::pair<Entity, size_t>, std::byte*, PairHash, PairEqual> entityComponentToData_;
 
-        std::unordered_set<Entity> emptyEntities_;
-
     public:
         ECSWorld() = default;
         virtual ~ECSWorld() = default;
+
+        ECSWorld(const ECSWorld&) = delete;
+        ECSWorld& operator=(const ECSWorld&) = delete;
+
+        static size_t CreateRegisterIndex();
+
+        /***************************************************************************************************************
+         * IECSWorld Implementation
+        /**************************************************************************************************************/
 
         void SetComponentFactoryRegistry(std::unique_ptr<IComponentFactoryRegistry> registry) override;
         void SetPoolFactory(std::unique_ptr<IPoolFactory> poolFactory) override;
@@ -56,6 +67,9 @@ namespace riaecs
 
         Entity CreateEntity() override;
         void DestroyEntity(const Entity &entity) override;
+
+        void RegisterEntity(size_t index, const Entity &entity) override;
+        Entity GetRegisteredEntity(size_t index) const override;
 
         void AddComponent(const Entity &entity, size_t componentID) override;
         void RemoveComponent(const Entity &entity, size_t componentID) override;

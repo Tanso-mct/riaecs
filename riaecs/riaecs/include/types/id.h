@@ -14,7 +14,7 @@ namespace riaecs
 
     public:
         ID(size_t index, size_t generation) : index_(index), generation_(generation) {}
-        ID() = delete;
+        ID() = default;
         ~ID() = default;
 
         size_t GetIndex() const { return index_; }

@@ -39,6 +39,9 @@ namespace riaecs
         virtual Entity CreateEntity() = 0;
         virtual void DestroyEntity(const Entity &entity) = 0;
 
+        virtual void RegisterEntity(size_t index, const Entity &entity) = 0;
+        virtual Entity GetRegisteredEntity(size_t index) const = 0;
+
         virtual void AddComponent(const Entity &entity, size_t componentID) = 0;
         virtual void RemoveComponent(const Entity &entity, size_t componentID) = 0;
         virtual bool HasComponent(const Entity &entity, size_t componentID) const = 0;

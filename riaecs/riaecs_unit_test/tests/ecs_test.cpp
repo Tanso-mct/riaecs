@@ -162,8 +162,21 @@ TEST(ECS, World)
     ecsWorld->DestroyEntity(entity1);
 
     // Re create entity
-    riaecs::Entity entity3 = ecsWorld->CreateEntity();
-    EXPECT_EQ(entity3.GetIndex(), 0);
+    size_t registerIndex = riaecs::ECSWorld::CreateRegisterIndex();
+    {
+        riaecs::Entity entity3 = ecsWorld->CreateEntity();
+        EXPECT_EQ(entity3.GetIndex(), 0);
+
+        // Register entity
+        ecsWorld->RegisterEntity(registerIndex, entity3);
+    }
+
+    // Check registered entity
+    {
+        riaecs::Entity registeredEntity = ecsWorld->GetRegisteredEntity(registerIndex);
+        EXPECT_EQ(registeredEntity.GetIndex(), entity1.GetIndex()); // Should be the same index as entity1
+        EXPECT_EQ(registeredEntity.GetGeneration(), entity1.GetGeneration() + 1); // Should be incremented after re-creation
+    }
 
     ecsWorld->DestroyWorld();
 }

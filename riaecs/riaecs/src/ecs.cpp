@@ -4,6 +4,8 @@
 #include "riaecs/include/utilities.h"
 #include "riaecs/include/global_registry.h"
 
+size_t riaecs::ECSWorld::nextRegisterIndex_ = 0;
+
 void riaecs::ECSWorld::SetComponentFactoryRegistry(std::unique_ptr<IComponentFactoryRegistry> registry)
 {
     std::unique_lock<std::shared_mutex> lock(mutex_);
@@ -187,6 +189,38 @@ void riaecs::ECSWorld::DestroyEntity(const Entity &entity)
 
     // Update the entityExistFlags to mark it as not existing
     entityExistFlags_[entity.GetIndex()] = false;
+}
+
+size_t riaecs::ECSWorld::CreateRegisterIndex()
+{
+    return nextRegisterIndex_++;
+}
+
+void riaecs::ECSWorld::RegisterEntity(size_t index, const Entity &entity)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+
+    if (!isReady_)
+        riaecs::NotifyError({"ECSWorld is not ready"}, RIAECS_LOG_LOC);
+
+    if (registeredEntities_.find(index) != registeredEntities_.end())
+        riaecs::NotifyError({"Entity already registered at index: " + std::to_string(index)}, RIAECS_LOG_LOC);
+
+    registeredEntities_[index] = entity;
+}
+
+riaecs::Entity riaecs::ECSWorld::GetRegisteredEntity(size_t index) const
+{
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+
+    if (!isReady_)
+        riaecs::NotifyError({"ECSWorld is not ready"}, RIAECS_LOG_LOC);
+
+    auto it = registeredEntities_.find(index);
+    if (it == registeredEntities_.end())
+        riaecs::NotifyError({"No entity registered at index: " + std::to_string(index)}, RIAECS_LOG_LOC);
+
+    return it->second;
 }
 
 void riaecs::ECSWorld::AddComponent(const Entity &entity, size_t componentID)
