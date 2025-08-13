@@ -64,18 +64,76 @@ namespace
     };
     riaecs::ComponentRegistrar<TestBComponent, 10> TestBComponentID;
 
+    class TestSystem : public riaecs::ISystem
+    {
+    public:
+        bool Update
+        (
+            riaecs::IECSWorld &world, riaecs::IAssetContainer &assetCont, 
+            riaecs::ISystemLoopCommandQueue &systemLoopCmdQueue
+        ) override
+        {
+            size_t componentCount = 0;
+            for (riaecs::Entity entity : world.View(TestAComponentID())())
+            {
+                riaecs::ReadOnlyObject<TestAComponent*> test 
+                = riaecs::GetComponent<TestAComponent>(world, entity, TestAComponentID());
+
+                if (test())
+                    std::cout << "TestAComponent value: " << test()->value << std::endl;
+
+                componentCount++;
+            }
+
+            std::cout << "TestSystem processed " << componentCount << " TestAComponent instances." << std::endl;
+
+            return false; // Stop the system loop after one update
+        }
+    };
+    riaecs::SystemFactoryRegistrar<TestSystem> TestSystemID;
+
+    class TestSystemListFactory : public riaecs::ISystemListFactory
+    {
+    public:
+        std::unique_ptr<riaecs::ISystemList> Create() const override
+        {
+            std::unique_ptr<riaecs::ISystemList> systemList = std::make_unique<riaecs::SystemList>();
+            systemList->Add(TestSystemID());
+            return systemList;
+        }
+
+        void Destroy(std::unique_ptr<riaecs::ISystemList> product) const override
+        {
+            product.reset();
+        }
+
+        size_t GetProductSize() const override
+        {
+            return sizeof(riaecs::SystemList);
+        }
+    };
+
 } // namespace
 
 TEST(ECS, World)
 {
+    // Create asset container
+    std::unique_ptr<riaecs::IAssetContainer> assetContainer = std::make_unique<riaecs::AssetContainer>();
+
+    // Create ECSWorld
     std::unique_ptr<riaecs::IECSWorld> ecsWorld = std::make_unique<riaecs::ECSWorld>();
     ecsWorld->SetComponentFactoryRegistry(std::move(riaecs::gComponentFactoryRegistry));
     ecsWorld->SetComponentMaxCountRegistry(std::move(riaecs::gComponentMaxCountRegistry));
     ecsWorld->SetPoolFactory(std::make_unique<mem_alloc_fixed_block::FixedBlockPoolFactory>());
     ecsWorld->SetAllocatorFactory(std::make_unique<mem_alloc_fixed_block::FixedBlockAllocatorFactory>());
     EXPECT_TRUE(ecsWorld->IsReady());
-
     ecsWorld->CreateWorld();
+
+    // Create system loop
+    std::unique_ptr<riaecs::ISystemLoop> systemLoop = std::make_unique<riaecs::SystemLoop>();
+    systemLoop->SetSystemListFactory(std::make_unique<TestSystemListFactory>());
+    systemLoop->SetSystemLoopCommandQueueFactory(std::make_unique<riaecs::EmptySystemLoopCommandQueueFactory>());
+    EXPECT_TRUE(systemLoop->IsReady());
 
     // Create entity 1
     riaecs::Entity entity1 = ecsWorld->CreateEntity();
@@ -177,6 +235,9 @@ TEST(ECS, World)
         EXPECT_EQ(registeredEntity.GetIndex(), entity1.GetIndex()); // Should be the same index as entity1
         EXPECT_EQ(registeredEntity.GetGeneration(), entity1.GetGeneration() + 1); // Should be incremented after re-creation
     }
+
+    systemLoop->Initialize();
+    systemLoop->Run(*ecsWorld, *assetContainer);
 
     ecsWorld->DestroyWorld();
 }

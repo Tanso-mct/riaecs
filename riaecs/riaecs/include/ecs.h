@@ -45,7 +45,7 @@ namespace riaecs
 
     public:
         ECSWorld() = default;
-        virtual ~ECSWorld() = default;
+        virtual ~ECSWorld() override;
 
         ECSWorld(const ECSWorld&) = delete;
         ECSWorld& operator=(const ECSWorld&) = delete;
@@ -139,12 +139,13 @@ namespace riaecs
     class RIAECS_API SystemList : public ISystemList
     {
     private:
+        std::vector<size_t> systemIDs_;
         std::vector<std::unique_ptr<ISystem>> systems_;
         mutable std::shared_mutex mutex_;
 
     public:
         SystemList() = default;
-        virtual ~SystemList() override = default;
+        virtual ~SystemList() override;
 
         SystemList(const SystemList&) = delete;
         SystemList& operator=(const SystemList&) = delete;
@@ -159,11 +160,11 @@ namespace riaecs
         void Clear() override;
     };
 
-    class RIAECS_API SystemListFactory : public ISystemListFactory
+    class RIAECS_API EmptySystemListFactory : public ISystemListFactory
     {
     public:
-        SystemListFactory() = default;
-        ~SystemListFactory() override = default;
+        EmptySystemListFactory() = default;
+        ~EmptySystemListFactory() override = default;
 
         /***************************************************************************************************************
          * IFactory Implementation
@@ -193,11 +194,11 @@ namespace riaecs
         bool IsEmpty() const override;
     };
 
-    class RIAECS_API SystemLoopCommandQueueFactory : public ISystemLoopCommandQueueFactory
+    class RIAECS_API EmptySystemLoopCommandQueueFactory : public ISystemLoopCommandQueueFactory
     {
     public:
-        SystemLoopCommandQueueFactory() = default;
-        ~SystemLoopCommandQueueFactory() override = default;
+        EmptySystemLoopCommandQueueFactory() = default;
+        ~EmptySystemLoopCommandQueueFactory() override = default;
 
         /***************************************************************************************************************
          * IFactory Implementation
@@ -222,7 +223,7 @@ namespace riaecs
 
     public:
         SystemLoop() = default;
-        virtual ~SystemLoop() override = default;
+        virtual ~SystemLoop() override;
 
         /***************************************************************************************************************
          * ISystemLoop Implementation

@@ -6,6 +6,11 @@
 
 size_t riaecs::ECSWorld::nextRegisterIndex_ = 0;
 
+riaecs::ECSWorld::~ECSWorld()
+{
+    DestroyWorld();
+}
+
 void riaecs::ECSWorld::SetComponentFactoryRegistry(std::unique_ptr<IComponentFactoryRegistry> registry)
 {
     std::unique_lock<std::shared_mutex> lock(mutex_);
@@ -91,9 +96,6 @@ void riaecs::ECSWorld::CreateWorld()
 
 void riaecs::ECSWorld::DestroyWorld()
 {
-    if (!IsReady())
-        riaecs::NotifyError({"ECSWorld is not ready"}, RIAECS_LOG_LOC);
-
     // Destroy all entities
     for (size_t index = 0; index < entityExistFlags_.size(); ++index)
         if (entityExistFlags_[index])
@@ -106,8 +108,13 @@ void riaecs::ECSWorld::DestroyWorld()
     entityToComponents_.clear();
     componentToEntities_.clear();
 
-    // Clear pools and allocators
+    // Destroy pools and allocators
+    for (size_t i = 0; i < componentPools_.size(); ++i)
+        poolFactory_->Destroy(std::move(componentPools_[i]));
     componentPools_.clear();
+
+    for (size_t i = 0; i < componentAllocators_.size(); ++i)
+        allocatorFactory_->Destroy(std::move(componentAllocators_[i]));
     componentAllocators_.clear();
 
     // Reset entity management
@@ -371,12 +378,25 @@ riaecs::ReadOnlyObject<std::unordered_set<riaecs::Entity>> riaecs::ECSWorld::Vie
     return riaecs::ReadOnlyObject<std::unordered_set<riaecs::Entity>>(std::move(lock), emptyEntities_);
 }
 
+riaecs::SystemList::~SystemList()
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+
+    for (size_t systemID : systemIDs_)
+    {
+        riaecs::ReadOnlyObject<riaecs::ISystemFactory> factory = riaecs::gSystemFactoryRegistry->Get(systemID);
+        factory().Destroy(std::move(systems_[systemID]));
+    }
+}
+
 void riaecs::SystemList::Add(size_t systemID)
 {
     std::unique_lock<std::shared_mutex> lock(mutex_);
     
     riaecs::ReadOnlyObject<riaecs::ISystemFactory> factory = riaecs::gSystemFactoryRegistry->Get(systemID);
     std::unique_ptr<riaecs::ISystem> system = factory().Create();
+
+    systemIDs_.emplace_back(systemID);
     systems_.emplace_back(std::move(system));
 }
 
@@ -405,17 +425,17 @@ void riaecs::SystemList::Clear()
     systems_.clear();
 }
 
-std::unique_ptr<riaecs::ISystemList> riaecs::SystemListFactory::Create() const
+std::unique_ptr<riaecs::ISystemList> riaecs::EmptySystemListFactory::Create() const
 {
     return std::make_unique<riaecs::SystemList>();
 }
 
-void riaecs::SystemListFactory::Destroy(std::unique_ptr<ISystemList> product) const
+void riaecs::EmptySystemListFactory::Destroy(std::unique_ptr<ISystemList> product) const
 {
     product.reset();
 }
 
-size_t riaecs::SystemListFactory::GetProductSize() const
+size_t riaecs::EmptySystemListFactory::GetProductSize() const
 {
     return sizeof(SystemList);
 }
@@ -444,19 +464,27 @@ bool riaecs::SystemLoopCommandQueue::IsEmpty() const
     return commandQueue_.empty();
 }
 
-std::unique_ptr<riaecs::ISystemLoopCommandQueue> riaecs::SystemLoopCommandQueueFactory::Create() const
+std::unique_ptr<riaecs::ISystemLoopCommandQueue> riaecs::EmptySystemLoopCommandQueueFactory::Create() const
 {
     return std::make_unique<SystemLoopCommandQueue>();
 }
 
-void riaecs::SystemLoopCommandQueueFactory::Destroy(std::unique_ptr<ISystemLoopCommandQueue> product) const
+void riaecs::EmptySystemLoopCommandQueueFactory::Destroy(std::unique_ptr<ISystemLoopCommandQueue> product) const
 {
     product.reset();
 }
 
-size_t riaecs::SystemLoopCommandQueueFactory::GetProductSize() const
+size_t riaecs::EmptySystemLoopCommandQueueFactory::GetProductSize() const
 {
     return sizeof(SystemLoopCommandQueue);
+}
+
+riaecs::SystemLoop::~SystemLoop()
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+
+    listFactory_->Destroy(std::move(systemList_));
+    loopCommandQueueFactory_->Destroy(std::move(commandQueue_));
 }
 
 void riaecs::SystemLoop::SetSystemListFactory(std::unique_ptr<ISystemListFactory> factory)
