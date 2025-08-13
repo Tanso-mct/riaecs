@@ -79,6 +79,8 @@ namespace
                 riaecs::ReadOnlyObject<TestAComponent*> test 
                 = riaecs::GetComponent<TestAComponent>(world, entity, TestAComponentID());
 
+                //world.AddComponent(entity, TestBComponentID()); // Should deadlock
+
                 if (test())
                     std::cout << "TestAComponent value: " << test()->value << std::endl;
 
